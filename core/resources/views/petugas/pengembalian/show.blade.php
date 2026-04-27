@@ -65,6 +65,17 @@
             <a href="{{ route('petugas.pengembalian.list') }}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left me-1"></i> Kembali
             </a>
+            @if (!empty($borrower?->phone))
+                <a href="{{ route('petugas.pengembalian.send-whatsapp', $pengembalian->id) }}"
+                    class="btn btn-outline-success" target="_blank" rel="noopener">
+                    <i class="bi bi-whatsapp me-1"></i> Kirim WhatsApp
+                </a>
+            @else
+                <button type="button" class="btn btn-outline-success" disabled
+                    title="Nomor WhatsApp peminjam belum tersedia">
+                    <i class="bi bi-whatsapp me-1"></i> Kirim WhatsApp
+                </button>
+            @endif
             <a href="{{ route('petugas.pengembalian.edit', $pengembalian->id) }}" class="btn btn-primary">
                 <i class="bi bi-pencil me-1"></i> Edit
             </a>

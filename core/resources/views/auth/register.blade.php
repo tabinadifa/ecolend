@@ -77,10 +77,10 @@
         justify-content: center;
     }
 
-    .brand-icon svg {
-        width: 22px;
-        height: 22px;
-        fill: white;
+    .brand-icon img {
+        width: 28px;
+        height: 28px;
+        object-fit: contain;
     }
 
     .brand-name {
@@ -351,9 +351,7 @@
 
         <div class="brand">
             <div class="brand-icon">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
-                </svg>
+                <img src="{{ asset('storage/uploads/logo/EcoLend.png') }}" alt="EcoLend Logo">
             </div>
             <span class="brand-name">Eco<span>Lend</span></span>
         </div>
@@ -415,7 +413,7 @@
                         <label>Email</label>
                         <div class="input-wrap">
                             <svg class="input-icon" viewBox="0 0 24 24" stroke-width="1.8"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            <input type="email" name="email" placeholder="email@kampus.ac.id" value="{{ old('email') }}" required>
+                            <input type="email" name="email" placeholder="email@gmail.com" value="{{ old('email') }}" required>
                         </div>
                     </div>
 
@@ -459,7 +457,7 @@
                     <label>Username</label>
                     <div class="input-wrap">
                         <svg class="input-icon" viewBox="0 0 24 24" stroke-width="1.8"><path d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        <input type="text" name="username" placeholder="pilih username unik" value="{{ old('username') }}" required>
+                        <input type="text" name="username" placeholder="Masukkan username" value="{{ old('username') }}" required>
                     </div>
                 </div>
 

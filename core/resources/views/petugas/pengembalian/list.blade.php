@@ -21,8 +21,8 @@
 
         <form method="GET" class="row g-2 mb-3 align-items-center mt-2">
             <div class="col-md-3">
-                <a href="{{ route('petugas.pengembalian.create') }}" class="btn btn-outline-warning w-100">
-                    Tambah Pengembalian
+                <a href="{{ route('petugas.peminjaman.list') }}" class="btn btn-outline-warning w-100">
+                    Pilih dari Peminjaman
                 </a>
             </div>
 
@@ -127,12 +127,23 @@
                                     class="btn btn-sm btn-outline-secondary">
                                     Lihat
                                 </a>
+                                @if (!empty($item->peminjaman->peminjam->phone))
+                                <a href="{{ route('petugas.pengembalian.send-whatsapp', $item->id) }}"
+                                    class="btn btn-sm btn-outline-success" target="_blank" rel="noopener">
+                                    WhatsApp
+                                </a>
+                                @else
+                                <button type="button" class="btn btn-sm btn-outline-success" disabled
+                                    title="Nomor WhatsApp peminjam belum tersedia">
+                                    WhatsApp
+                                </button>
+                                @endif
                             </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center text-muted py-4">
+                        <td colspan="8" class="text-center text-muted py-4">
                             Data pengembalian tidak ditemukan
                         </td>
                     </tr>

@@ -252,15 +252,16 @@
 	}
 
 	.nav-link.active {
-		background-color: #ffffff;
-		color: #d96800;
+		background-color: rgba(255, 255, 255, 0.14);
+		color: #ffffff;
 		font-weight: 700;
-		box-shadow: 0 8px 20px rgba(139, 62, 0, 0.2);
+		border: 1px solid rgba(255, 255, 255, 0.28);
+		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 6px 18px rgba(122, 54, 0, 0.2);
 	}
 
 	.nav-link.active .nav-icon {
-		background-color: #fff4e7;
-		color: #d96800;
+		background-color: rgba(255, 255, 255, 0.16);
+		color: #ffffff;
 	}
 
 	.nav-link-danger {

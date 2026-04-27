@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class PengembalianController extends Controller
@@ -28,7 +29,7 @@ class PengembalianController extends Controller
         $query = Pengembalian::with([
             'peminjaman:id,alat_id,peminjam_id,tanggal_pinjam,tanggal_kembali',
             'peminjaman.alat:id,nama_alat',
-            'peminjaman.peminjam:id,name,username,email',
+            'peminjaman.peminjam:id,name,username,email,phone',
             'fileBuktiPengembalian:id,file_name,file_path',
         ])->select(
             'id',
@@ -74,29 +75,52 @@ class PengembalianController extends Controller
     /* =======================
      * FORM CREATE
      * ======================= */
-    public function create()
+    public function create(Request $request)
     {
         if (!Auth::check()) {
             return redirect()->route('auth.login')
                 ->with('error', 'Silakan login terlebih dahulu.');
         }
 
-        $peminjamans = Peminjaman::with([
+        $peminjamanId = (int) $request->query('peminjaman_id');
+        if ($peminjamanId <= 0) {
+            return redirect()->route('petugas.peminjaman.list')
+                ->with('info', 'Pilih data peminjaman dari menu peminjaman untuk memproses pengembalian.');
+        }
+
+        $peminjaman = Peminjaman::with([
             'alat:id,nama_alat',
-            'peminjam:id,name,username',
+            'peminjam:id,name,username,email',
         ])->select(
             'id',
             'alat_id',
             'peminjam_id',
+            'total_alat',
             'tanggal_pinjam',
             'tanggal_kembali',
-            'status'
-        )->where('status', 'approve')
-            ->orderByDesc('tanggal_pinjam')
-            ->get();
+            'status',
+            'tujuan'
+        )->whereKey($peminjamanId)
+            ->first();
+
+        if (!$peminjaman) {
+            return redirect()->route('petugas.peminjaman.list')
+                ->with('error', 'Data peminjaman tidak ditemukan.');
+        }
+
+        if ($peminjaman->status !== 'approve') {
+            return redirect()->route('petugas.peminjaman.list')
+                ->with('info', 'Hanya peminjaman berstatus disetujui yang dapat diproses pengembaliannya.');
+        }
+
+        $sudahDikembalikan = Pengembalian::where('peminjaman_id', $peminjaman->id)->exists();
+        if ($sudahDikembalikan) {
+            return redirect()->route('petugas.pengembalian.list')
+                ->with('info', 'Peminjaman ini sudah memiliki data pengembalian.');
+        }
 
         return view('petugas.pengembalian.create', [
-            'peminjamans' => $peminjamans,
+            'peminjaman' => $peminjaman,
             'files' => FileManager::select('id', 'file_name', 'file_path', 'created_at')
                 ->where('file_path', 'like', '%bukti-pengembalian%')
                 ->orderByDesc('created_at')
@@ -192,7 +216,7 @@ class PengembalianController extends Controller
 
         $pengembalian->load(
             'peminjaman.alat:id,nama_alat',
-            'peminjaman.peminjam:id,name,username,email',
+            'peminjaman.peminjam:id,name,username,email,phone,address',
             'fileBuktiPengembalian'
         );
 
@@ -295,6 +319,50 @@ class PengembalianController extends Controller
     }
 
     /* =======================
+     * SEND WHATSAPP
+     * ======================= */
+    public function sendWhatsApp(Pengembalian $pengembalian)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('auth.login')
+                ->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        $pengembalian->loadMissing('peminjaman.alat:id,nama_alat', 'peminjaman.peminjam:id,name,phone');
+
+        $peminjaman = $pengembalian->peminjaman;
+        $peminjam = $peminjaman?->peminjam;
+
+        if (!$peminjaman || !$peminjam) {
+            return redirect()->back()
+                ->with('error', 'Data peminjaman/peminjam tidak ditemukan.');
+        }
+
+        if (empty($peminjam->phone)) {
+            return redirect()->back()
+                ->with('error', 'Nomor WhatsApp peminjam belum diisi.');
+        }
+
+        $phone = preg_replace('/[^0-9]/', '', (string) $peminjam->phone);
+
+        if (Str::startsWith($phone, '0')) {
+            $phone = '62' . substr($phone, 1);
+        } elseif (!Str::startsWith($phone, '62')) {
+            $phone = '62' . $phone;
+        }
+
+        if ($phone === '62' || strlen($phone) < 10) {
+            return redirect()->back()
+                ->with('error', 'Nomor WhatsApp peminjam tidak valid.');
+        }
+
+        $message = $this->getWhatsAppMessageTemplate($pengembalian);
+        $whatsappUrl = 'https://wa.me/' . $phone . '?text=' . rawurlencode($message);
+
+        return redirect()->away($whatsappUrl);
+    }
+
+    /* =======================
      * DELETE
      * ======================= */
     public function destroy(Pengembalian $pengembalian)
@@ -334,5 +402,47 @@ class PengembalianController extends Controller
 
         $hariTelat = $tglKembali->diffInDays($tglPengembalian);
         return $hariTelat * 2000;
+    }
+
+    private function getWhatsAppMessageTemplate(Pengembalian $pengembalian): string
+    {
+        $peminjaman = $pengembalian->peminjaman;
+        $peminjam = $peminjaman?->peminjam;
+        $alat = $peminjaman?->alat;
+
+        $tanggalPengembalian = $pengembalian->tanggal_pengembalian
+            ? Carbon::parse($pengembalian->tanggal_pengembalian)->translatedFormat('d F Y')
+            : '-';
+
+        $kondisiMap = [
+            'baik' => 'Baik',
+            'rusak_ringan' => 'Rusak Ringan',
+            'rusak_berat' => 'Rusak Berat',
+            'hilang' => 'Hilang',
+        ];
+
+        $statusMap = [
+            'lunas' => 'Lunas',
+            'belum_lunas' => 'Belum Lunas',
+            'pending' => 'Menunggu Konfirmasi',
+        ];
+
+        $kondisi = $kondisiMap[$pengembalian->kondisi_alat] ?? ucfirst((string) $pengembalian->kondisi_alat);
+        $statusPembayaran = $statusMap[$pengembalian->status] ?? ucfirst((string) $pengembalian->status);
+        $denda = (float) ($pengembalian->denda ?? 0);
+        $dendaText = $denda > 0
+            ? 'Rp ' . number_format($denda, 0, ',', '.')
+            : 'Tidak ada denda';
+
+        return "Yth. {$peminjam->name},\n\n"
+            . "Berikut informasi pengembalian alat Anda pada Sistem EcoLend:\n"
+            . "- Nama Alat: " . ($alat->nama_alat ?? '-') . "\n"
+            . "- Tanggal Pengembalian: {$tanggalPengembalian}\n"
+            . "- Kondisi Alat: {$kondisi}\n"
+            . "- Total Denda: {$dendaText}\n"
+            . "- Status Pembayaran Denda: {$statusPembayaran}\n\n"
+            . "Jika terdapat ketidaksesuaian data, silakan hubungi petugas laboratorium.\n\n"
+            . "Terima kasih.\n"
+            . "Petugas EcoLend";
     }
 }

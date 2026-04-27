@@ -75,6 +75,10 @@
 							<th class="text-muted">Total Alat</th>
 							<td>{{ number_format($peminjaman->total_alat) }} Unit</td>
 						</tr>
+						<tr>
+							<th class="text-muted">Tujuan</th>
+							<td>{{ $peminjaman->tujuan ?? '-' }}</td>
+						</tr>
 					</table>
 				</div>
 			</div>

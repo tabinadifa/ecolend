@@ -124,7 +124,7 @@
     </div>
 </form>
 
-@include('admin.pengembalian.partials.file-picker-modal', ['files' => $files])
+@include('admin.alat.partials.file-picker-modal', ['files' => $files])
 @endsection
 
 @push('styles')

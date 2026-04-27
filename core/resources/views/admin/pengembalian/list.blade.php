@@ -22,11 +22,11 @@
 
         {{-- Controls --}}
         <form method="GET" class="row g-2 mb-3 align-items-center mt-2">
-            <div class="col-md-3">
+            {{-- <div class="col-md-3">
                 <a href="{{ route('pengembalian.create') }}" class="btn btn-outline-warning w-100">
                     Tambah Pengembalian
                 </a>
-            </div>
+            </div> --}}
 
             <div class="col-md-2">
                 <select name="per_page" class="form-select" onchange="this.form.submit()">
@@ -127,10 +127,10 @@
                                     Detail
                                 </a>
 
-                                <a href="{{ route('pengembalian.edit', $item->id) }}"
+                                {{-- <a href="{{ route('pengembalian.edit', $item->id) }}"
                                     class="btn btn-sm btn-outline-primary">
                                     Edit
-                                </a>
+                                </a> --}}
 
                                 <form
                                     action="{{ route('pengembalian.destroy', $item->id) }}"

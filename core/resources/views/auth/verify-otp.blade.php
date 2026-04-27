@@ -49,10 +49,10 @@
         justify-content: center;
     }
 
-    .brand-icon svg {
-        width: 22px;
-        height: 22px;
-        fill: white;
+    .brand-icon img {
+        width: 28px;
+        height: 28px;
+        object-fit: contain;
     }
 
     .brand-name {
@@ -207,9 +207,7 @@
 <div class="page-wrap">
     <div class="brand">
         <div class="brand-icon">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
-            </svg>
+            <img src="{{ asset('storage/uploads/logo/EcoLend.png') }}" alt="EcoLend Logo">
         </div>
         <span class="brand-name">Eco<span>Lend</span></span>
     </div>

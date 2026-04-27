@@ -6,7 +6,7 @@
 <style>
 	.dashboard-wrapper { font-family: 'Poppins', sans-serif; }
 	.page-header { margin-bottom: 2rem; margin-top: 0.5rem; }
-	.page-header h2 { font-family: 'Poppins', serif; font-size: 1.75rem; font-weight: 700; color: #7a3f00; }
+	.page-header h2 { font-family: 'Poppins', sans-serif; font-size: 1.75rem; font-weight: 700; color: #7a3f00; }
 	.page-header p { color: #a06c3d; font-size: 0.875rem; }
 	.stat-card { border: none; border-radius: 1.125rem; padding: 1.5rem; transition: transform 0.25s ease; animation: fadeSlideUp 0.5s ease both; }
 	.stat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.1); }
@@ -16,7 +16,7 @@
 	.stat-icon.green { background: #FFF1DC; color: #D96A00; }
 	.stat-icon.amber { background: #FEF3C7; color: #D97706; }
 	.stat-icon.rose { background: #FEE2E2; color: #DC2626; }
-	.stat-value { font-family: 'Poppins', serif; font-size: 2rem; font-weight: 700; line-height: 1; margin-bottom: 0.35rem; }
+	.stat-value { font-family: 'Poppins', sans-serif; font-size: 2rem; font-weight: 700; line-height: 1; margin-bottom: 0.35rem; }
 	.stat-label { font-size: 0.8rem; font-weight: 500; color: #a06c3d; }
 	.stat-card.primary .stat-label { color: rgba(255,255,255,0.75); }
 	.stat-badge { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 20px; background: #FFF1DC; color: #D96A00; }

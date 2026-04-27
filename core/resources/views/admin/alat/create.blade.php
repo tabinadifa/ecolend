@@ -122,8 +122,8 @@
     </div>
 </div>
 
-{{-- Reuse modal file picker yang sama --}}
-@include('admin.pengembalian.partials.file-picker-modal', ['files' => $files])
+{{-- Modal file picker khusus alat --}}
+@include('admin.alat.partials.file-picker-modal', ['files' => $files])
 @endsection
 
 @push('styles')

@@ -4,123 +4,43 @@
 
 @push('styles')
 <style>
-    .page-title {
-        color: var(--primary-green);
-    }
-
-    .page-subtitle {
-        color: #6B7280;
-        letter-spacing: 0.06em;
-    }
-
-    .filter-card,
-    .table-card {
-        border: none;
-        border-radius: 1rem;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-        overflow: hidden;
-    }
-
-    .filter-card .card-body,
-    .table-card .card-body,
-    .table-card .card-footer {
-        background: #fff;
-    }
-
-    .info-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        font-size: 0.9rem;
-        color: #6B7280;
-        background: #fff;
-        border-radius: 999px;
-        padding: 0.55rem 0.9rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    }
-
-    .form-label {
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: #6B7280;
-        letter-spacing: 0.04em;
-        margin-bottom: 0.45rem;
-    }
-
-    .form-control,
-    .form-select {
-        border-radius: 0.85rem;
-        border: 1px solid #E5E7EB;
-        min-height: 44px;
-        box-shadow: none;
-    }
-
-    .form-control:focus,
-    .form-select:focus {
-        border-color: var(--light-green);
-        box-shadow: 0 0 0 0.18rem rgba(255, 140, 0, 0.15);
-    }
-
-    .table thead th {
-        background-color: #FFF7ED;
-        border-top: none;
-        border-bottom: 1px solid #F3E8D8;
-        color: #9A6B1F;
-        font-size: 0.82rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        white-space: nowrap;
-    }
-
-    .table > :not(caption) > * > * {
-        vertical-align: middle;
-        padding: 1rem 0.9rem;
-    }
-
-    .table tbody tr:hover {
-        background: #FFFDF9;
-    }
-
-    .borrower-name,
-    .tool-name {
-        color: #1F2937;
-    }
-
-    .borrower-email,
-    .table-muted {
-        color: #6B7280;
-        font-size: 0.875rem;
-    }
-
-    .detail-link {
-        color: var(--primary-green);
-        font-weight: 600;
-        text-decoration: none;
-    }
-
-    .detail-link:hover {
-        color: var(--light-green);
-        text-decoration: underline;
-    }
-
     .status-badge {
         font-size: 0.78rem;
         font-weight: 700;
         text-transform: uppercase;
         border-radius: 999px;
-        padding: 0.55rem 0.8rem;
+        padding: 0.5rem 0.8rem;
     }
 
     .status-cell {
-        min-width: 220px;
+        min-width: 170px;
     }
 
-    .btn-status {
-        border-radius: 0.75rem;
-        font-weight: 600;
-        white-space: nowrap;
+    .status-stack {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 0.65rem;
+    }
+
+    .status-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .btn-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 0.65rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+
+    .btn-icon i {
+        font-size: 0.92rem;
     }
 
     .btn-outline-eco {
@@ -133,24 +53,6 @@
         background: var(--primary-green);
         color: #fff;
         border-color: var(--primary-green);
-    }
-
-    .btn-eco {
-        background: linear-gradient(135deg, var(--light-green), var(--primary-green));
-        color: #fff;
-        border: none;
-        border-radius: 0.8rem;
-        font-weight: 600;
-    }
-
-    .btn-eco:hover {
-        color: #fff;
-        opacity: 0.95;
-    }
-
-    .empty-state {
-        padding: 3rem 1rem;
-        color: #6B7280;
     }
 
     .modal-content {
@@ -168,107 +70,14 @@
         font-weight: 700;
     }
 
-    .alert-info {
-        background-color: #FFF7ED;
-        border: 1px solid #FED7AA;
-        color: #9A3412;
-    }
-
-    .pagination {
-        margin-bottom: 0;
-    }
-
-    .page-item.active .page-link {
-        background-color: var(--primary-green);
-        border-color: var(--primary-green);
-    }
-
-    .page-link {
-        color: var(--primary-green);
-        border-radius: 0.5rem !important;
-        margin: 0 2px;
-    }
-
-    .page-link:focus {
-        box-shadow: 0 0 0 0.18rem rgba(255, 140, 0, 0.15);
-    }
-
-    .page-header-responsive {
-        gap: 1rem;
-    }
-
-    @media (max-width: 991.98px) {
-        .page-title {
-            font-size: 1.7rem;
-        }
-
-        .table > :not(caption) > * > * {
-            padding: 0.9rem 0.75rem;
-        }
-    }
-
     @media (max-width: 767.98px) {
-        .page-header-responsive {
-            flex-direction: column;
-            align-items: flex-start !important;
-        }
-
-        .page-header-responsive .text-end {
-            width: 100%;
-            text-align: left !important;
-        }
-
-        .content-wrapper {
-            padding: 1rem !important;
-        }
-
-        .filter-card .card-body,
-        .table-card .card-footer {
-            padding: 1rem;
-        }
-
         .table {
             min-width: 760px;
         }
 
-        .status-badge {
-            display: inline-block;
-            margin-bottom: 0.5rem;
-        }
-
-        .btn-status {
-            display: block;
-            width: 100%;
-            margin-left: 0 !important;
-        }
-    }
-
-    @media (max-width: 575.98px) {
-        .page-title {
-            font-size: 1.35rem;
-        }
-
-        .page-subtitle {
-            font-size: 0.72rem;
-        }
-
-        .info-chip {
-            font-size: 0.82rem;
-            width: 100%;
-            justify-content: center;
-        }
-
-        .modal-dialog {
-            margin: 0.75rem;
-        }
-
-        .modal-footer {
+        .status-stack {
             flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .modal-footer .btn {
-            width: 100%;
+            align-items: flex-start;
         }
     }
 </style>
@@ -299,37 +108,23 @@
         };
     @endphp
 
-    <div class="d-flex justify-content-between align-items-center mb-4 page-header-responsive">
-        <div>
-            <p class="page-subtitle text-uppercase mb-1 small fw-semibold">Modul Peminjaman</p>
-            <h1 class="page-title fw-bold mb-0">Daftar Peminjaman</h1>
-        </div>
-
-        <div class="text-end">
-            <span class="info-chip">
-                <i class="bi bi-database-fill"></i>
-                Total Data: <strong>{{ number_format($peminjaman->total()) }}</strong>
-            </span>
-        </div>
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-5">
+        <h2 class="fw-bold mb-0">Daftar Peminjaman</h2>
     </div>
 
     @foreach (['success', 'error', 'info'] as $msg)
         @if (session($msg))
-            <div class="alert alert-{{ $msg === 'error' ? 'danger' : $msg }} alert-dismissible fade show border-0 shadow-sm mb-4">
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-{{ $msg === 'success' ? 'check-circle-fill' : ($msg === 'error' ? 'exclamation-triangle-fill' : 'info-circle-fill') }} me-2"></i>
-                    <div>{{ session($msg) }}</div>
-                </div>
+            <div class="alert alert-{{ $msg === 'error' ? 'danger' : $msg }} alert-dismissible fade show">
+                {{ session($msg) }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
     @endforeach
 
-    <div class="card filter-card mb-4">
+    <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body">
-            <form method="GET" class="row g-3 align-items-end">
-                <div class="col-12 col-sm-6 col-md-3 col-lg-2">
-                    <label for="per_page" class="form-label">Per Halaman</label>
+            <form method="GET" class="row g-2 mb-3 align-items-center mt-2">
+                <div class="col-md-2">
                     <select id="per_page" name="per_page" class="form-select" onchange="this.form.submit()">
                         @foreach ($perPageOptions as $option)
                             <option value="{{ $option }}" @selected((int) request('per_page', 10) === $option)>
@@ -339,26 +134,21 @@
                     </select>
                 </div>
 
-                <div class="col-12 col-md-9 col-lg-6">
-                    <label for="search" class="form-label">Kata Kunci</label>
+                <div class="col-md-4 ms-auto">
                     <input
                         type="text"
                         id="search"
                         name="search"
                         class="form-control"
-                        placeholder="Cari nama peminjam atau nama alat"
+                        placeholder="Cari nama peminjam / alat..."
                         value="{{ request('search') }}"
                         onkeydown="if(event.key==='Enter'){this.form.submit()}">
                 </div>
             </form>
-        </div>
-    </div>
 
-    <div class="card table-card">
-        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead>
+                <table class="table table-striped align-middle">
+                    <thead class="table-light">
                         <tr>
                             <th>Data Peminjam</th>
                             <th>Nama Alat</th>
@@ -385,25 +175,40 @@
                                 <td>{{ ucfirst($item->tujuan) }}</td>
 
                                 <td class="status-cell">
-                                    <span class="badge status-badge {{ $statusBadges[$item->status] ?? 'bg-secondary' }}">
-                                        {{ $statusLabels[$item->status] ?? ucfirst($item->status) }}
-                                    </span>
+                                    <div class="status-stack">
+                                        <span class="badge status-badge {{ $statusBadges[$item->status] ?? 'bg-secondary' }}">
+                                            {{ $statusLabels[$item->status] ?? ucfirst($item->status) }}
+                                        </span>
 
-                                    @if ($item->status !== 'returned')
-                                        <button
-                                            type="button"
-                                            class="btn btn-outline-eco btn-sm ms-2 btn-status"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#statusModal-{{ $item->id }}">
-                                            Ubah Status
-                                        </button>
-                                    @endif
+                                        <div class="status-actions">
+                                            @if ($item->status !== 'returned')
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-outline-eco btn-sm btn-icon"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#statusModal-{{ $item->id }}"
+                                                    title="Ubah Status"
+                                                    aria-label="Ubah Status">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </button>
+                                            @endif
+
+                                            @if ($item->status === 'approve')
+                                                <a href="{{ route('petugas.pengembalian.create', ['peminjaman_id' => $item->id]) }}"
+                                                    class="btn btn-sm btn-outline-success btn-icon"
+                                                    title="Proses Pengembalian"
+                                                    aria-label="Proses Pengembalian">
+                                                    <i class="bi bi-arrow-return-left"></i>
+                                                </a>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
                                 <td colspan="6" class="text-center">
-                                    <div class="empty-state">
+                                    <div class="text-muted py-4">
                                         <i class="bi bi-inbox fs-4 d-block mb-2"></i>
                                         Data peminjaman tidak ditemukan
                                     </div>
@@ -413,21 +218,17 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-
-        <div class="card-footer d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-            <div class="small text-muted mb-0">
+        <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
                 @if ($peminjaman->total())
-                    Menampilkan {{ $peminjaman->firstItem() }} - {{ $peminjaman->lastItem() }} dari
+                    Menampilkan {{ $peminjaman->firstItem() }} – {{ $peminjaman->lastItem() }} dari
                     {{ $peminjaman->total() }} data
                 @else
                     Tidak ada data untuk ditampilkan
                 @endif
-            </div>
+            </small>
 
-            <div>
-                {{ $peminjaman->onEachSide(1)->links('pagination::bootstrap-5') }}
-            </div>
+            {{ $peminjaman->onEachSide(1)->links('pagination::bootstrap-5') }}
         </div>
     </div>
 

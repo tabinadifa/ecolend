@@ -75,7 +75,9 @@ class AuthController extends Controller
 
             // Set session for OTP and redirect
             session(['verify_email' => $user->email]);
-            return redirect()->route('auth.verify_otp')->with('error', 'Akun Anda belum diverifikasi. Silakan masukkan kode OTP yang dikirim ke email Anda.');
+            return redirect()->route('auth.verify_otp')->withErrors([
+                'login' => 'Email Anda belum diverifikasi. Silakan masukkan kode OTP yang dikirim ke email Anda.',
+            ]);
         }
 
         if ($user instanceof User) {

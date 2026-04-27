@@ -4,7 +4,7 @@
             <div class="modal-header border-0">
                 <div>
                     <h5 class="modal-title fw-semibold" id="filePickerModalLabel">Pilih Gambar Alat</h5>
-                    <p class="text-muted mb-0">Klik tombol "Gunakan" untuk mengaitkan gambar ke pengembalian.</p>
+                    <p class="text-muted mb-0">Klik tombol "Gunakan" untuk mengaitkan gambar ke data alat.</p>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>

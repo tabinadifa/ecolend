@@ -115,22 +115,25 @@ class PeminjamanController extends Controller
             return back()->with('info', 'Status peminjaman sudah sesuai.');
         }
 
-        $previousStatus = $peminjaman->status;
-        $previousAlatId = $peminjaman->alat_id;
-        $previousTotal = $peminjaman->total_alat;
+        DB::transaction(function () use ($peminjaman, $validated) {
+            $lockedPeminjaman = Peminjaman::whereKey($peminjaman->id)
+                ->lockForUpdate()
+                ->first();
 
-        DB::transaction(function () use (
-            $peminjaman,
-            $validated,
-            $previousStatus,
-            $previousAlatId,
-            $previousTotal
-        ) {
-            if ($previousStatus === 'approve' && $validated['status'] !== 'approve') {
-                AlatStockService::restore($previousAlatId, $previousTotal);
+            if (!$lockedPeminjaman) {
+                return;
             }
 
-            $peminjaman->update([
+            $previousStatus = $lockedPeminjaman->status;
+            if ($previousStatus === $validated['status']) {
+                return;
+            }
+
+            if ($previousStatus === 'approve' && $validated['status'] !== 'approve') {
+                AlatStockService::restore($lockedPeminjaman->alat_id, $lockedPeminjaman->total_alat);
+            }
+
+            $lockedPeminjaman->update([
                 'status' => $validated['status'],
                 'alasan_ditolak' => $validated['status'] === 'rejected'
                     ? ($validated['alasan_ditolak'] ?? null)
@@ -138,7 +141,7 @@ class PeminjamanController extends Controller
             ]);
 
             if ($validated['status'] === 'approve' && $previousStatus !== 'approve') {
-                AlatStockService::deduct($peminjaman->alat_id, $peminjaman->total_alat);
+                AlatStockService::deduct($lockedPeminjaman->alat_id, $lockedPeminjaman->total_alat);
             }
         });
 
