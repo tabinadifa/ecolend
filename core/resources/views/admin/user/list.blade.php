@@ -9,6 +9,31 @@
             color: #2D6F4E;
             font-weight: 600;
         }
+
+        .btn-theme {
+            background-color: #f28c28;
+            border-color: #f28c28;
+            color: #fff;
+        }
+
+        .btn-theme:hover,
+        .btn-theme:focus {
+            background-color: #e07f22;
+            border-color: #e07f22;
+            color: #fff;
+        }
+
+        .btn-outline-theme {
+            border-color: #f28c28;
+            color: #f28c28;
+        }
+
+        .btn-outline-theme:hover,
+        .btn-outline-theme:focus {
+            background-color: #fef1e5;
+            border-color: #f28c28;
+            color: #d97117;
+        }
     </style>
 @endpush
 
@@ -30,7 +55,7 @@
             <!-- Controls -->
             <form method="GET" class="row g-2 mb-3 align-items-center mt-2">
                 <div class="col-md-3">
-                    <a href="{{ route('user.create') }}" class="btn btn-outline-warning w-100">Tambah Pengguna</a>
+                    <a href="{{ route('user.create') }}" class="btn btn-theme w-100">Tambah Pengguna</a>
                 </div>
 
                 <div class="col-md-2">
@@ -83,16 +108,22 @@
                                     <div class="d-inline-flex gap-2">
                                         <a href="{{ route('user.edit', $user->id) }}"
                                             class="btn btn-sm btn-outline-primary">Edit</a>
-                                        <form action="{{ route('user.destroy', $user->id) }}" method="POST"
-                                            class="form-hapus" data-title="Yakin ingin menghapus?"
-                                            data-text="Data user ini akan dihapus secara permanen.">
-                                            @csrf
-                                            @method('DELETE')
+                                        @if (Auth::id() === $user->id)
+                                            {{-- <button type="button" class="btn btn-sm btn-outline-theme" disabled>
+                                                Akun Anda
+                                            </button> --}}
+                                        @else
+                                            <form action="{{ route('user.destroy', $user->id) }}" method="POST"
+                                                class="form-hapus" data-title="Yakin ingin menghapus?"
+                                                data-text="Data user ini akan dihapus secara permanen.">
+                                                @csrf
+                                                @method('DELETE')
 
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                Hapus
-                                            </button>
-                                        </form>
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    Hapus
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

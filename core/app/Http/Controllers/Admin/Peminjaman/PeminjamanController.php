@@ -79,10 +79,16 @@ class PeminjamanController extends Controller
                 ->with('error', 'Silakan login terlebih dahulu.');
         }
 
-        $peminjaman->loadMissing('alat:id,nama_alat', 'peminjam:id,name,username,email');
+        $peminjaman->loadMissing(
+            'alat:id,nama_alat,deskripsi,jumlah_stok,kategori_id,gambar_alat_id',
+            'alat.kategori:id,nama_kategori',
+            'peminjam:id,name,username,email,role,npm,program_studi,no_telp,profile_id',
+            'pengembalian',
+            'pengembalian.fileBuktiPengembalian:id,file_name,file_path'
+        );
 
         return view('admin.peminjaman.show', [
-            'peminjaman' => $peminjaman->load('alat', 'peminjam'),
+            'peminjaman' => $peminjaman,
             'allowedStatuses' => $this->allowedStatuses,
         ]);
     }

@@ -421,10 +421,10 @@
                 @csrf
 
                 <div class="form-group">
-                    <label>Email atau Username</label>
+                    <label>Email/Username/NPM</label>
                     <div class="input-wrap">
                         <svg class="input-icon" viewBox="0 0 24 24" stroke-width="1.8"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        <input type="text" name="login" value="{{ old('login') }}" placeholder="npm / username / email" required>
+                        <input type="text" name="login" value="{{ old('login') }}" placeholder="Masukkan email / username / npm " required>
                     </div>
                 </div>
 

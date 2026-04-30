@@ -50,6 +50,10 @@
                             <td>{{ \Carbon\Carbon::parse($peminjaman->tanggal_kembali)->format('d M Y') }}</td>
                         </tr>
                         <tr>
+                            <th class="text-muted">Tujuan</th>
+                            <td>{{ $peminjaman->tujuan ?? '-' }}</td>
+                        </tr>
+                        <tr>
                             <th class="text-muted">Total Alat</th>
                             <td>{{ $peminjaman->total_alat }}</td>
                         </tr>
@@ -78,13 +82,25 @@
                     <h5 class="fw-semibold mb-3">Peminjam</h5>
 
                     <p class="mb-1">
-                        <strong>{{ $peminjaman->peminjam->name }}</strong>
+                        <strong>{{ optional($peminjaman->peminjam)->name ?? '-' }}</strong>
                     </p>
                     <p class="mb-1 text-muted">
-                        Username: {{ $peminjaman->peminjam->username }}
+                        Username: {{ optional($peminjaman->peminjam)->username ?? '-' }}
                     </p>
                     <p class="mb-0 text-muted">
-                        Email: {{ $peminjaman->peminjam->email }}
+                        Email: {{ optional($peminjaman->peminjam)->email ?? '-' }}
+                    </p>
+                    <p class="mb-0 text-muted">
+                        Role: {{ optional($peminjaman->peminjam)->role ?? '-' }}
+                    </p>
+                    <p class="mb-0 text-muted">
+                        NPM: {{ optional($peminjaman->peminjam)->npm ?? '-' }}
+                    </p>
+                    <p class="mb-0 text-muted">
+                        Program Studi: {{ optional($peminjaman->peminjam)->program_studi ?? '-' }}
+                    </p>
+                    <p class="mb-0 text-muted">
+                        No. Telepon: {{ optional($peminjaman->peminjam)->no_telp ?? '-' }}
                     </p>
                 </div>
             </div>
@@ -95,16 +111,68 @@
                     <h5 class="fw-semibold mb-3">Alat Dipinjam</h5>
 
                     <p class="mb-1">
-                        <strong>{{ $peminjaman->alat->nama_alat }}</strong>
+                        <strong>{{ optional($peminjaman->alat)->nama_alat ?? '-' }}</strong>
+                    </p>
+                    <p class="mb-1 text-muted">
+                        Deskripsi: {{ optional($peminjaman->alat)->deskripsi ?? '-' }}
+                    </p>
+                    <p class="mb-1 text-muted">
+                        Stok Saat Ini: {{ optional($peminjaman->alat)->jumlah_stok ?? '-' }}
                     </p>
 
-                    @if ($peminjaman->alat->kategori ?? false)
-                        <span class="badge bg-secondary">
-                            {{ $peminjaman->alat->kategori->nama_kategori }}
-                        </span>
-                    @endif
+                    <p class="mb-0 text-muted">
+                        Kategori: {{ optional(optional($peminjaman->alat)->kategori)->nama_kategori ?? '-' }}
+                    </p>
                 </div>
             </div>
+        </div>
+    </div>
+
+    {{-- Informasi Pengembalian --}}
+    <div class="card border-0 shadow-sm rounded-4 mt-4">
+        <div class="card-body">
+            <h5 class="fw-semibold mb-3">Informasi Pengembalian</h5>
+
+            @if ($peminjaman->pengembalian)
+                <table class="table table-borderless mb-0">
+                    <tr>
+                        <th width="30%" class="text-muted">Tanggal Pengembalian</th>
+                        <td>
+                            {{ $peminjaman->pengembalian->tanggal_pengembalian
+                                ? \Carbon\Carbon::parse($peminjaman->pengembalian->tanggal_pengembalian)->format('d M Y')
+                                : '-' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Kondisi Alat</th>
+                        <td>{{ $peminjaman->pengembalian->kondisi_alat ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Status</th>
+                        <td>{{ $peminjaman->pengembalian->status ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Denda</th>
+                        <td>
+                            {{ $peminjaman->pengembalian->denda !== null ? 'Rp ' . number_format($peminjaman->pengembalian->denda) : '-' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Metode Pembayaran</th>
+                        <td>{{ $peminjaman->pengembalian->metode_pembayaran ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Catatan</th>
+                        <td>{{ $peminjaman->pengembalian->catatan ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Bukti</th>
+                        <td>{{ $peminjaman->pengembalian->fileBuktiPengembalian->file_name ?? '-' }}</td>
+                    </tr>
+                </table>
+            @else
+                <p class="mb-0 text-muted">Belum ada data pengembalian.</p>
+            @endif
         </div>
     </div>
 

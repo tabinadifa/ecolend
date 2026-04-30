@@ -47,6 +47,7 @@ Route::prefix('ecolend')->middleware('auth')->group(function () {
 
     Route::controller(ProfileController::class)->prefix('profile')->group(function () {
         Route::get('/', 'profile')->name('profile');
+        Route::put('update', 'updateProfile')->name('profile.update');
         Route::post('photo', 'uploadProfilePhoto')->name('profile.photo.upload');
         Route::post('password', 'updatePassword')->name('profile.password.update');
     });
@@ -98,6 +99,7 @@ Route::prefix('ecolend')->middleware('auth')->group(function () {
 
         Route::controller(LogAktivitasController::class)->prefix('log-aktivitas')->group(function () {
             Route::get('/', 'index')->name('admin.log.index');
+            Route::get('export/pdf', 'exportPdf')->name('admin.log.export');
         });
     });
 

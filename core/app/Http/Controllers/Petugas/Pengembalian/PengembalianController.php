@@ -29,7 +29,7 @@ class PengembalianController extends Controller
         $query = Pengembalian::with([
             'peminjaman:id,alat_id,peminjam_id,tanggal_pinjam,tanggal_kembali',
             'peminjaman.alat:id,nama_alat',
-            'peminjaman.peminjam:id,name,username,email,phone',
+            'peminjaman.peminjam:id,name,username,email,no_telp',
             'fileBuktiPengembalian:id,file_name,file_path',
         ])->select(
             'id',
@@ -216,7 +216,7 @@ class PengembalianController extends Controller
 
         $pengembalian->load(
             'peminjaman.alat:id,nama_alat',
-            'peminjaman.peminjam:id,name,username,email,phone,address',
+            'peminjaman.peminjam:id,name,username,email,no_telp,npm,program_studi',
             'fileBuktiPengembalian'
         );
 
@@ -328,7 +328,7 @@ class PengembalianController extends Controller
                 ->with('error', 'Silakan login terlebih dahulu.');
         }
 
-        $pengembalian->loadMissing('peminjaman.alat:id,nama_alat', 'peminjaman.peminjam:id,name,phone');
+        $pengembalian->loadMissing('peminjaman.alat:id,nama_alat', 'peminjaman.peminjam:id,name,no_telp');
 
         $peminjaman = $pengembalian->peminjaman;
         $peminjam = $peminjaman?->peminjam;
@@ -338,12 +338,12 @@ class PengembalianController extends Controller
                 ->with('error', 'Data peminjaman/peminjam tidak ditemukan.');
         }
 
-        if (empty($peminjam->phone)) {
+        if (empty($peminjam->no_telp)) {
             return redirect()->back()
                 ->with('error', 'Nomor WhatsApp peminjam belum diisi.');
         }
 
-        $phone = preg_replace('/[^0-9]/', '', (string) $peminjam->phone);
+        $phone = preg_replace('/[^0-9]/', '', (string) $peminjam->no_telp);
 
         if (Str::startsWith($phone, '0')) {
             $phone = '62' . substr($phone, 1);

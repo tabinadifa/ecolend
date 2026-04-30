@@ -2,6 +2,35 @@
 
 @section('title', 'Edit Pengguna - Lendify')
 
+@push('styles')
+    <style>
+        .btn-theme {
+            background-color: #f28c28;
+            border-color: #f28c28;
+            color: #fff;
+        }
+
+        .btn-theme:hover,
+        .btn-theme:focus {
+            background-color: #e07f22;
+            border-color: #e07f22;
+            color: #fff;
+        }
+
+        .btn-outline-theme {
+            border-color: #f28c28;
+            color: #f28c28;
+        }
+
+        .btn-outline-theme:hover,
+        .btn-outline-theme:focus {
+            background-color: #fef1e5;
+            border-color: #f28c28;
+            color: #d97117;
+        }
+    </style>
+@endpush
+
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="fw-bold mb-0">Edit Pengguna</h2>
@@ -44,8 +73,8 @@
             </div>
 
             <div class="col-12 d-flex justify-content-end gap-2">
-                <a href="{{ route('user.list') }}" class="btn btn-outline-secondary">Batal</a>
-                <button type="submit" class="btn btn-primary">Perbarui</button>
+                <a href="{{ route('user.list') }}" class="btn btn-outline-theme">Batal</a>
+                <button type="submit" class="btn btn-theme">Perbarui</button>
             </div>
         </form>
     </div>

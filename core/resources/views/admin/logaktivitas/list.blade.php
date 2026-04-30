@@ -29,6 +29,39 @@
             padding: 0.4rem 0.75rem;
             text-transform: uppercase;
         }
+
+        .btn-theme {
+            background-color: #f28c28;
+            border-color: #f28c28;
+            color: #fff;
+        }
+
+        .btn-theme:hover,
+        .btn-theme:focus {
+            background-color: #e07f22;
+            border-color: #e07f22;
+            color: #fff;
+        }
+
+        .btn-outline-theme {
+            border-color: #f28c28;
+            color: #f28c28;
+        }
+
+        .btn-outline-theme:hover,
+        .btn-outline-theme:focus {
+            background-color: #fef1e5;
+            border-color: #f28c28;
+            color: #d97117;
+        }
+
+        .filter-actions {
+            flex-wrap: wrap;
+        }
+
+        .filter-actions .btn {
+            min-width: 110px;
+        }
     </style>
 @endpush
 
@@ -39,7 +72,63 @@
             <h1 class="page-title fw-bold mb-0">Log Aktivitas</h1>
         </div>
         <div class="text-end">
-            <span class="text-muted small">Total {{ number_format($logs->total()) }} catatan</span>
+            <span class="text-muted small d-block">Total {{ number_format($logs->total()) }} catatan</span>
+            <a class="btn btn-sm btn-theme mt-2" href="{{ route('admin.log.export', request()->query()) }}">
+                <i class="bi bi-printer me-1"></i>
+                Cetak PDF
+            </a>
+        </div>
+    </div>
+
+    <div class="card filter-card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ route('admin.log.index') }}" class="row g-3 align-items-end">
+                <div class="col-12 col-md-4">
+                    <label class="form-label small text-muted" for="search">Cari</label>
+                    <input
+                        type="text"
+                        id="search"
+                        name="search"
+                        class="form-control"
+                        placeholder="Nama user, deskripsi, aksi, model"
+                        value="{{ request('search') }}"
+                    />
+                </div>
+                <div class="col-12 col-md-2">
+                    <label class="form-label small text-muted" for="action">Aksi</label>
+                    <select id="action" name="action" class="form-select">
+                        <option value="">Semua</option>
+                        <option value="create" @selected(request('action') === 'create')>Create</option>
+                        <option value="update" @selected(request('action') === 'update')>Update</option>
+                        <option value="delete" @selected(request('action') === 'delete')>Delete</option>
+                        <option value="login" @selected(request('action') === 'login')>Login</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-2">
+                    <label class="form-label small text-muted" for="start_date">Mulai</label>
+                    <input
+                        type="date"
+                        id="start_date"
+                        name="start_date"
+                        class="form-control"
+                        value="{{ request('start_date') }}"
+                    />
+                </div>
+                <div class="col-12 col-md-2">
+                    <label class="form-label small text-muted" for="end_date">Sampai</label>
+                    <input
+                        type="date"
+                        id="end_date"
+                        name="end_date"
+                        class="form-control"
+                        value="{{ request('end_date') }}"
+                    />
+                </div>
+                <div class="col-12 col-md-3 d-flex gap-2 filter-actions">
+                    <button type="submit" class="btn btn-theme flex-grow-1">Terapkan</button>
+                    <a href="{{ route('admin.log.index') }}" class="btn btn-outline-theme flex-grow-1">Reset</a>
+                </div>
+            </form>
         </div>
     </div>
 

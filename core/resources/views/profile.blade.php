@@ -31,6 +31,18 @@
             object-fit: cover;
         }
 
+        .profile-photo-wrap button {
+            border: 0;
+            background: transparent;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .profile-photo-clickable {
+            cursor: pointer;
+        }
+
         .profile-photo-empty {
             font-size: 3rem;
             color: #ff8c00;
@@ -53,7 +65,22 @@
             font-weight: 700;
             color: #1f2937;
         }
+
+        .photo-preview {
+            border: 1px dashed #ffd8a5;
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            background: #fffaf2;
+        }
+
+        .photo-preview img {
+            width: 100%;
+            max-height: 220px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+        }
     </style>
+    <link rel="stylesheet" href="https://unpkg.com/cropperjs@1.6.2/dist/cropper.min.css">
 @endpush
 
 @section('content')
@@ -76,7 +103,9 @@
                 <div class="card-body p-4 text-center">
                     <div class="profile-photo-wrap mb-3">
                         @if($user->profilePhoto?->file_path)
-                            <img src="{{ asset($user->profilePhoto->file_path) }}" alt="Foto Profil">
+                            <button type="button" class="profile-photo-clickable" data-bs-toggle="modal" data-bs-target="#profilePhotoModal">
+                                <img src="{{ asset($user->profilePhoto->file_path) }}" alt="Foto Profil" id="profilePhotoThumb">
+                            </button>
                         @else
                             <i class="bi bi-person-fill profile-photo-empty"></i>
                         @endif
@@ -93,8 +122,16 @@
                     <form action="{{ route('profile.photo.upload') }}" method="POST" enctype="multipart/form-data" class="text-start">
                         @csrf
                         <label class="form-label fw-semibold">Upload Foto Profil</label>
-                        <input type="file" name="profile_photo" class="form-control mb-3"
+                        <input type="file" name="profile_photo" id="profilePhotoInput" class="form-control mb-3"
                             accept="image/png,image/jpeg,image/jpg,image/webp" required>
+                        <div class="photo-preview mb-3 d-none" id="photoPreviewWrap">
+                            <img id="photoPreview" alt="Preview Foto Profil">
+                        </div>
+                        <div class="d-flex gap-2 mb-3">
+                            <button type="button" class="btn btn-outline-secondary w-100 d-none" id="openCropModal">
+                                <i class="bi bi-crop me-1"></i> Atur Foto
+                            </button>
+                        </div>
                         <button type="submit" class="btn btn-warning w-100 fw-semibold">
                             <i class="bi bi-cloud-arrow-up me-1"></i> Perbarui Foto
                         </button>
@@ -110,45 +147,92 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="fw-bold mb-0">Informasi Akun</h5>
                     </div>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label text-muted">Nama Lengkap</label>
-                            <input type="text" class="form-control" value="{{ $user->name ?? '-' }}" readonly>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-muted">Peran</label>
-                            <div class="border rounded-3 px-3 py-2 bg-light d-flex align-items-center justify-content-between">
-                                <span class="fw-semibold text-dark text-capitalize">{{ $user->role ?? '-' }}</span>
-                                <i class="bi bi-shield-check text-warning"></i>
+                    <form action="{{ route('profile.update') }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">Nama Lengkap</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    class="form-control @error('name') is-invalid @enderror"
+                                    value="{{ old('name', $user->name) }}"
+                                    required
+                                >
+                                @error('name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">Peran</label>
+                                <div class="border rounded-3 px-3 py-2 bg-light d-flex align-items-center justify-content-between">
+                                    <span class="fw-semibold text-dark text-capitalize">{{ $user->role ?? '-' }}</span>
+                                    <i class="bi bi-shield-check text-warning"></i>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">Email</label>
+                                <input type="email" class="form-control" value="{{ $user->email ?? '-' }}" readonly>
+                                <small class="text-muted">Email tidak dapat diubah.</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">Username</label>
+                                <input
+                                    type="text"
+                                    name="username"
+                                    class="form-control @error('username') is-invalid @enderror"
+                                    value="{{ old('username', $user->username) }}"
+                                    required
+                                >
+                                @error('username')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">NPM</label>
+                                <input
+                                    type="text"
+                                    name="npm"
+                                    class="form-control @error('npm') is-invalid @enderror"
+                                    value="{{ old('npm', $user->npm) }}"
+                                >
+                                @error('npm')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">Program Studi</label>
+                                <input
+                                    type="text"
+                                    name="program_studi"
+                                    class="form-control @error('program_studi') is-invalid @enderror"
+                                    value="{{ old('program_studi', $user->program_studi) }}"
+                                >
+                                @error('program_studi')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label text-muted">No. Telepon</label>
+                                <input
+                                    type="text"
+                                    name="no_telp"
+                                    class="form-control @error('no_telp') is-invalid @enderror"
+                                    value="{{ old('no_telp', $user->no_telp) }}"
+                                >
+                                @error('no_telp')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-muted">Email</label>
-                            <input type="email" class="form-control" value="{{ $user->email ?? '-' }}" readonly>
+
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-warning fw-semibold px-4">
+                                <i class="bi bi-save2 me-1"></i> Simpan Profil
+                            </button>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-muted">Username</label>
-                            <input type="text" class="form-control" value="{{ $user->username ?? '-' }}" readonly>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="profile-kpi">
-                                <div class="label">NPM</div>
-                                <div class="value">{{ $user->npm ?? '-' }}</div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="profile-kpi">
-                                <div class="label">Program Studi</div>
-                                <div class="value">{{ $user->program_studi ?? '-' }}</div>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="profile-kpi">
-                                <div class="label">No. Telepon</div>
-                                <div class="value">{{ $user->no_telp ?? '-' }}</div>
-                            </div>
-                        </div>
-                    </div>
+                    </form>
                 </div>
             </div>
 
@@ -195,4 +279,161 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="cropperModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content rounded-4">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Atur Foto Profil</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="w-100" style="max-height: 420px; overflow: hidden;">
+                        <img id="cropperImage" alt="Crop Foto" style="width: 100%;">
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-secondary" id="zoomIn">
+                            <i class="bi bi-zoom-in me-1"></i> Zoom In
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="zoomOut">
+                            <i class="bi bi-zoom-out me-1"></i> Zoom Out
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="rotateLeft">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> Putar
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-warning" id="applyCrop">
+                        <i class="bi bi-check2-circle me-1"></i> Gunakan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="profilePhotoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Foto Profil</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="profilePhotoPreview" class="img-fluid rounded-4" alt="Foto Profil" style="max-height: 70vh;">
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
+
+@push('scripts')
+    <script src="https://unpkg.com/cropperjs@1.6.2/dist/cropper.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const profilePhotoModal = document.getElementById('profilePhotoModal');
+            const profilePhotoThumb = document.getElementById('profilePhotoThumb');
+            const profilePhotoPreview = document.getElementById('profilePhotoPreview');
+            const input = document.getElementById('profilePhotoInput');
+            const previewWrap = document.getElementById('photoPreviewWrap');
+            const previewImg = document.getElementById('photoPreview');
+            const openCropModalBtn = document.getElementById('openCropModal');
+            const cropperImage = document.getElementById('cropperImage');
+            const modalEl = document.getElementById('cropperModal');
+            const zoomInBtn = document.getElementById('zoomIn');
+            const zoomOutBtn = document.getElementById('zoomOut');
+            const rotateLeftBtn = document.getElementById('rotateLeft');
+            const applyCropBtn = document.getElementById('applyCrop');
+            let cropper = null;
+            let objectUrl = null;
+
+            function destroyCropper() {
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
+            }
+
+            function revokeObjectUrl() {
+                if (objectUrl) {
+                    URL.revokeObjectURL(objectUrl);
+                    objectUrl = null;
+                }
+            }
+
+            if (input) {
+                input.addEventListener('change', () => {
+                    const file = input.files?.[0];
+                    if (!file) return;
+
+                    revokeObjectUrl();
+                    objectUrl = URL.createObjectURL(file);
+                    previewImg.src = objectUrl;
+                    previewWrap.classList.remove('d-none');
+                    openCropModalBtn.classList.remove('d-none');
+                });
+            }
+
+            if (profilePhotoModal && profilePhotoPreview) {
+                profilePhotoModal.addEventListener('show.bs.modal', () => {
+                    if (profilePhotoThumb?.src) {
+                        profilePhotoPreview.src = profilePhotoThumb.src;
+                    }
+                });
+            }
+
+            if (openCropModalBtn && modalEl && window.bootstrap) {
+                const modal = new bootstrap.Modal(modalEl);
+
+                openCropModalBtn.addEventListener('click', () => {
+                    if (!previewImg.src) return;
+                    cropperImage.src = previewImg.src;
+                    modal.show();
+                });
+
+                modalEl.addEventListener('shown.bs.modal', () => {
+                    destroyCropper();
+                    cropper = new Cropper(cropperImage, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        autoCropArea: 1,
+                        responsive: true,
+                        background: false,
+                        movable: true,
+                        zoomable: true,
+                        rotatable: true,
+                        scalable: false,
+                    });
+                });
+
+                modalEl.addEventListener('hidden.bs.modal', () => {
+                    destroyCropper();
+                });
+
+                zoomInBtn?.addEventListener('click', () => cropper?.zoom(0.1));
+                zoomOutBtn?.addEventListener('click', () => cropper?.zoom(-0.1));
+                rotateLeftBtn?.addEventListener('click', () => cropper?.rotate(-90));
+
+                applyCropBtn?.addEventListener('click', () => {
+                    if (!cropper) return;
+                    cropper.getCroppedCanvas({
+                        width: 512,
+                        height: 512,
+                        imageSmoothingQuality: 'high'
+                    }).toBlob((blob) => {
+                        if (!blob) return;
+                        const file = new File([blob], 'profile-photo.jpg', { type: 'image/jpeg' });
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        input.files = dataTransfer.files;
+
+                        revokeObjectUrl();
+                        objectUrl = URL.createObjectURL(file);
+                        previewImg.src = objectUrl;
+                        modal.hide();
+                    }, 'image/jpeg', 0.9);
+                });
+            }
+        });
+    </script>
+@endpush

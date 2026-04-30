@@ -9,6 +9,31 @@
             color: #0D47A1;
             font-weight: 600;
         }
+
+        .btn-theme {
+            background-color: #f28c28;
+            border-color: #f28c28;
+            color: #fff;
+        }
+
+        .btn-theme:hover,
+        .btn-theme:focus {
+            background-color: #e07f22;
+            border-color: #e07f22;
+            color: #fff;
+        }
+
+        .btn-outline-theme {
+            border-color: #f28c28;
+            color: #f28c28;
+        }
+
+        .btn-outline-theme:hover,
+        .btn-outline-theme:focus {
+            background-color: #fef1e5;
+            border-color: #f28c28;
+            color: #d97117;
+        }
     </style>
 @endpush
 
@@ -32,7 +57,7 @@
             <!-- Controls -->
             <form method="GET" class="row g-2 mb-3 align-items-center mt-2">
                 <div class="col-md-3">
-                    <button type="button" class="btn btn-outline-warning w-100" data-bs-toggle="modal"
+                    <button type="button" class="btn btn-theme w-100" data-bs-toggle="modal"
                         data-bs-target="#modalTambahKategori">
                         Tambah Kategori
                     </button>
@@ -139,7 +164,7 @@
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             Batal
                         </button>
-                        <button type="submit" class="btn btn-success">
+                        <button type="submit" class="btn btn-theme">
                             Simpan
                         </button>
                     </div>
@@ -171,7 +196,7 @@
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             Batal
                         </button>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-theme">
                             Simpan Perubahan
                         </button>
                     </div>

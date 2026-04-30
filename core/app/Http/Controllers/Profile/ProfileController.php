@@ -153,19 +153,28 @@ class ProfileController extends Controller
         ]);
     }
 
-    // public function updateProfile(Request $request)
-    // {
-    //     $user = Auth::user();
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
 
-    //     if (!$user) {
-    //         return redirect()->route('auth.login')->with('error', 'Silakan login terlebih dahulu.');
-    //     }
+        if (!$user) {
+            return redirect()->route('auth.login')->with('error', 'Silakan login terlebih dahulu.');
+        }
 
-    //     $validated = $request->validate([
-    //         'name' => ['required', 'string', 'max:255' . $user->id],
-    //         'username' => ['required', 'string', 'max:255', 'unique:users,username,' . $user->id],
-    //         'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
-    //     ]);
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'username' => ['required', 'string', 'max:255', 'unique:users,username,' . $user->id],
+            'npm' => ['nullable', 'string', 'max:50'],
+            'program_studi' => ['nullable', 'string', 'max:100'],
+            'no_telp' => ['nullable', 'string', 'max:20'],
+        ], [
+            'name.required' => 'Nama lengkap wajib diisi.',
+            'username.required' => 'Username wajib diisi.',
+            'username.unique' => 'Username sudah digunakan.',
+        ]);
 
-    // }
+        $user->update($validated);
+
+        return redirect()->route('profile')->with('success', 'Profil berhasil diperbarui.');
+    }
 }
