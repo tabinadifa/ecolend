@@ -28,7 +28,7 @@ class PengembalianController extends Controller
         $query = Pengembalian::with([
             'peminjaman:id,alat_id,peminjam_id,tanggal_pinjam,tanggal_kembali',
             'peminjaman.alat:id,nama_alat',
-            'peminjaman.peminjam:id,name,username,email',
+            'peminjaman.peminjam:id,name,username,email,no_telp',
             'fileBuktiPengembalian:id,file_name,file_path',
         ])->select(
             'id',
@@ -192,7 +192,7 @@ class PengembalianController extends Controller
 
         $pengembalian->load(
             'peminjaman.alat:id,nama_alat',
-            'peminjaman.peminjam:id,name,username,email',
+            'peminjaman.peminjam:id,name,username,email,no_telp,npm,program_studi',
             'fileBuktiPengembalian'
         );
 
@@ -213,7 +213,7 @@ class PengembalianController extends Controller
 
         $pengembalian->loadMissing(
             'peminjaman.alat:id,nama_alat',
-            'peminjaman.peminjam:id,name,username'
+            'peminjaman.peminjam:id,name,username,email'
         );
 
         $peminjamans = Peminjaman::with([

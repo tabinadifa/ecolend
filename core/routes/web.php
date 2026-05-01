@@ -89,8 +89,8 @@ Route::prefix('ecolend')->middleware('auth')->group(function () {
 
         Route::controller(AdminPengembalianController::class)->prefix('pengembalian')->group(function () {
             Route::get('/', 'listPengembalian')->name('pengembalian.list');
-            Route::get('create', 'create')->name('pengembalian.create');
-            Route::post('/', 'store')->name('pengembalian.store');
+            // Route::get('create', 'create')->name('pengembalian.create');
+            // Route::post('/', 'store')->name('pengembalian.store');
             Route::get('{pengembalian}', 'show')->name('pengembalian.show');
             Route::get('{pengembalian}/edit', 'edit')->name('pengembalian.edit');
             Route::put('{pengembalian}', 'update')->name('pengembalian.update');

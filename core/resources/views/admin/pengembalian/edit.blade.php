@@ -25,7 +25,6 @@
         $today = now()->format('Y-m-d');
         $selectedPeminjamanId = (int) old('peminjaman_id', $pengembalian->peminjaman_id);
 
-        $peminjamans->loadMissing(['peminjam:id,name,username', 'alat:id,nama_alat']);
         $pengembalian->loadMissing('peminjaman.peminjam:id,name,username,email', 'peminjaman.alat:id,nama_alat');
 
         $tanggalPengembalianValue = old(
@@ -51,8 +50,17 @@
         $selectedFilePreview = $selectedFile ? asset($selectedFile->path ?? $selectedFile->file_path) : null;
         $selectedFileName = $selectedFile ? ($selectedFile->nama_file ?? ($selectedFile->file_name ?? 'Tanpa nama')) : null;
 
-        $selectedOptionExists = $peminjamans->contains('id', $selectedPeminjamanId);
-        $currentPeminjaman = $peminjamans->firstWhere('id', $selectedPeminjamanId) ?? $pengembalian->peminjaman;
+        $currentPeminjaman = $pengembalian->peminjaman;
+        $pinjamDate = $currentPeminjaman?->tanggal_pinjam
+            ? \Illuminate\Support\Carbon::parse($currentPeminjaman->tanggal_pinjam)
+            : null;
+        $dueDate = $currentPeminjaman?->tanggal_kembali
+            ? \Illuminate\Support\Carbon::parse($currentPeminjaman->tanggal_kembali)
+            : null;
+        $isOverdueNow = $dueDate ? $dueDate->isPast() && !$dueDate->isToday() : false;
+        $statusKey = $currentPeminjaman?->status ?? 'pending';
+        $statusLabel = $statusLabels[$statusKey] ?? ucfirst($statusKey);
+        $statusClass = $statusClasses[$statusKey] ?? 'text-bg-secondary';
     @endphp
 
     <div class="d-flex flex-wrap justify-content-between gap-3 align-items-start mb-4">
@@ -60,6 +68,9 @@
             <h2 class="fw-bold mb-1">Edit Pengembalian</h2>
             <p class="text-muted mb-0">Perbarui rincian pengembalian atau sesuaikan peminjaman yang terhubung.</p>
         </div>
+        <a href="{{ route('pengembalian.list') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Kembali ke Pengembalian
+        </a>
     </div>
 
     @if ($errors->any())
@@ -73,124 +84,9 @@
         </div>
     @endif
 
-    @if ($peminjamans->isEmpty())
+    @if (!$currentPeminjaman)
         <div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4">
-            Tidak ada peminjaman lain tersedia saat ini. Pastikan data peminjaman sudah lengkap.
-        </div>
-    @else
-        <div class="card border-0 shadow-sm rounded-4 mb-4">
-            <div class="card-body">
-                @if (!$selectedOptionExists && $currentPeminjaman)
-                    @php
-                        $currentStatusKey = $currentPeminjaman->status ?? 'unknown';
-                        $currentStatusLabel = $statusLabels[$currentStatusKey] ?? ucfirst($currentStatusKey);
-                    @endphp
-                @endif
-
-                <div class="d-flex flex-wrap gap-3 align-items-center">
-                    <div>
-                        <h5 class="fw-semibold mb-1">Pilih Peminjaman</h5>
-                        <p class="text-muted small mb-0" data-selected-alert>
-                            Peminjaman saat ini disorot. Klik baris lain bila perlu mengganti.
-                        </p>
-                    </div>
-                    <div class="ms-auto" style="min-width: 240px;">
-                        <input type="search" class="form-control" id="searchPeminjaman" placeholder="Cari peminjam atau alat">
-                    </div>
-                </div>
-
-                <div class="table-responsive mt-3">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Peminjam</th>
-                                <th>Alat</th>
-                                <th>Pinjam</th>
-                                <th>Batas Kembali</th>
-                                <th>Status</th>
-                                <th class="text-end">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody data-peminjaman-table>
-                            @foreach ($peminjamans as $peminjaman)
-                                @php
-                                    $pinjamDate = $peminjaman->tanggal_pinjam
-                                        ? \Illuminate\Support\Carbon::parse($peminjaman->tanggal_pinjam)
-                                        : null;
-                                    $dueDate = $peminjaman->tanggal_kembali
-                                        ? \Illuminate\Support\Carbon::parse($peminjaman->tanggal_kembali)
-                                        : null;
-                                    $isOverdueNow = $dueDate ? $dueDate->isPast() : false;
-                                    $statusKey = $peminjaman->status ?? 'pending';
-                                    $statusLabel = $statusLabels[$statusKey] ?? ucfirst($statusKey);
-                                    $statusClass = $statusClasses[$statusKey] ?? 'text-bg-secondary';
-                                @endphp
-                                <tr class="peminjaman-row {{ $selectedPeminjamanId === $peminjaman->id ? 'table-active' : '' }}"
-                                    data-peminjaman-row="{{ $peminjaman->id }}"
-                                    data-peminjaman-nama="{{ $peminjaman->peminjam->name ?? '-' }}"
-                                    data-peminjaman-username="{{ $peminjaman->peminjam->username ?? '-' }}"
-                                    data-alat="{{ $peminjaman->alat->nama_alat ?? '-' }}"
-                                    data-pinjam-date="{{ $pinjamDate?->format('Y-m-d') }}"
-                                    data-due-date="{{ $dueDate?->format('Y-m-d') }}"
-                                    data-status-label="{{ $statusLabel }}"
-                                    data-status-class="{{ $statusClass }}"
-                                    data-overdue="{{ $isOverdueNow ? 'true' : 'false' }}">
-                                    <td>
-                                        <div class="fw-semibold">{{ $peminjaman->peminjam->name ?? 'Peminjam tidak tersedia' }}</div>
-                                        <div class="text-muted small">{{ $peminjaman->peminjam->username ?? '-' }}</div>
-                                    </td>
-                                    <td>{{ $peminjaman->alat->nama_alat ?? 'Alat tidak ditemukan' }}</td>
-                                    <td>{{ $pinjamDate?->format('d M Y') ?? '-' }}</td>
-                                    <td>
-                                        @if ($dueDate)
-                                            {{ $dueDate->format('d M Y') }}
-                                            @if ($isOverdueNow)
-                                                <span class="badge text-bg-danger ms-2">Telat</span>
-                                            @endif
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
-                                    <td><span class="badge {{ $statusClass }}">{{ $statusLabel }}</span></td>
-                                    <td class="text-end">
-                                        <button type="button" class="btn btn-sm btn-outline-primary"
-                                            data-peminjaman-trigger="{{ $peminjaman->id }}">
-                                            Gunakan
-                                        </button>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="selected-summary border rounded-4 p-3 mt-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <h6 class="fw-semibold mb-1">Detail Peminjaman Terhubung</h6>
-                        </div>
-                        <span class="badge text-bg-secondary" data-summary-status>Memuat...</span>
-                    </div>
-                    <div class="row g-3 small">
-                        <div class="col-md-6">
-                            <p class="text-muted mb-1">Peminjam</p>
-                            <p class="fw-semibold mb-0" data-summary="peminjam">-</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p class="text-muted mb-1">Alat</p>
-                            <p class="fw-semibold mb-0" data-summary="alat">-</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p class="text-muted mb-1">Tanggal Pinjam</p>
-                            <p class="fw-semibold mb-0" data-summary="pinjam">-</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p class="text-muted mb-1">Batas Kembali</p>
-                            <p class="fw-semibold mb-0" data-summary="kembali">-</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            Data peminjaman tidak ditemukan. Silakan pilih dari daftar peminjaman atau masuk dari detail peminjaman.
         </div>
     @endif
 
@@ -198,79 +94,79 @@
         @csrf
         @method('PUT')
 
-        <select name="peminjaman_id" id="peminjaman_id" class="form-select d-none" aria-hidden="true" tabindex="-1">
-            <option value="" disabled {{ $selectedPeminjamanId ? '' : 'selected' }}>Pilih peminjaman</option>
-            @foreach ($peminjamans as $peminjaman)
-                @php
-                    $pinjamDate = $peminjaman->tanggal_pinjam
-                        ? \Illuminate\Support\Carbon::parse($peminjaman->tanggal_pinjam)
-                        : null;
-                    $dueDate = $peminjaman->tanggal_kembali
-                        ? \Illuminate\Support\Carbon::parse($peminjaman->tanggal_kembali)
-                        : null;
-                    $statusKey = $peminjaman->status ?? 'pending';
-                    $statusLabel = $statusLabels[$statusKey] ?? ucfirst($statusKey);
-                    $statusClass = $statusClasses[$statusKey] ?? 'text-bg-secondary';
-                    $isOverdueNow = $dueDate ? $dueDate->isPast() : false;
-                @endphp
-                <option value="{{ $peminjaman->id }}" data-peminjam="{{ $peminjaman->peminjam->name ?? '-' }}"
-                    data-username="{{ $peminjaman->peminjam->username ?? '-' }}"
-                    data-alat="{{ $peminjaman->alat->nama_alat ?? '-' }}"
-                    data-pinjam-date="{{ $pinjamDate?->format('Y-m-d') }}"
-                    data-due-date="{{ $dueDate?->format('Y-m-d') }}" data-status-label="{{ $statusLabel }}"
-                    data-status-class="{{ $statusClass }}" data-overdue="{{ $isOverdueNow ? 'true' : 'false' }}"
-                    {{ $selectedPeminjamanId === $peminjaman->id ? 'selected' : '' }}>
-                    {{ $peminjaman->peminjam->name ?? 'Peminjam tidak tersedia' }} -
-                    {{ $peminjaman->alat->nama_alat ?? 'Alat tidak ditemukan' }}
-                </option>
-            @endforeach
+        <input
+            type="hidden"
+            name="peminjaman_id"
+            id="peminjaman_id"
+            value="{{ $selectedPeminjamanId }}"
+            data-due-date="{{ $dueDate?->format('Y-m-d') }}"
+        >
 
-            @if (!$selectedOptionExists && $currentPeminjaman)
-                @php
-                    $pinjamDate = $currentPeminjaman->tanggal_pinjam
-                        ? \Illuminate\Support\Carbon::parse($currentPeminjaman->tanggal_pinjam)
-                        : null;
-                    $dueDate = $currentPeminjaman->tanggal_kembali
-                        ? \Illuminate\Support\Carbon::parse($currentPeminjaman->tanggal_kembali)
-                        : null;
-                    $statusKey = $currentPeminjaman->status ?? 'pending';
-                    $statusLabel = $statusLabels[$statusKey] ?? ucfirst($statusKey);
-                    $statusClass = $statusClasses[$statusKey] ?? 'text-bg-secondary';
-                    $isOverdueNow = $dueDate ? $dueDate->isPast() : false;
-                @endphp
-                <option value="{{ $currentPeminjaman->id }}" data-peminjam="{{ $currentPeminjaman->peminjam->name ?? '-' }}"
-                    data-username="{{ $currentPeminjaman->peminjam->username ?? '-' }}"
-                    data-alat="{{ $currentPeminjaman->alat->nama_alat ?? '-' }}"
-                    data-pinjam-date="{{ $pinjamDate?->format('Y-m-d') }}"
-                    data-due-date="{{ $dueDate?->format('Y-m-d') }}" data-status-label="{{ $statusLabel }}"
-                    data-status-class="{{ $statusClass }}" data-overdue="{{ $isOverdueNow ? 'true' : 'false' }}"
-                    selected>
-                    {{ $currentPeminjaman->peminjam->name ?? 'Peminjam tidak tersedia' }} -
-                    {{ $currentPeminjaman->alat->nama_alat ?? 'Alat tidak ditemukan' }}
-                </option>
-            @endif
-        </select>
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+                        <div>
+                            <h5 class="fw-semibold mb-1">Data Peminjaman Terpilih</h5>
+                            <p class="text-muted small mb-0">Data ini diambil dari menu peminjaman dan tidak dapat diubah di halaman ini.</p>
+                        </div>
+                        <span class="badge {{ $statusClass }}">{{ $statusLabel }}</span>
+                    </div>
+
+                    @if ($currentPeminjaman)
+                        <div class="row g-3 small">
+                            <div class="col-md-4">
+                                <p class="text-muted mb-1">Peminjam</p>
+                                <p class="fw-semibold mb-0">{{ $currentPeminjaman->peminjam->name ?? '-' }}</p>
+                                <p class="text-muted mb-0">{{ $currentPeminjaman->peminjam->email ?? '-' }}</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="text-muted mb-1">Alat</p>
+                                <p class="fw-semibold mb-0">{{ $currentPeminjaman->alat->nama_alat ?? '-' }}</p>
+                                <p class="text-muted mb-0">{{ $currentPeminjaman->total_alat ?? 0 }} unit</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="text-muted mb-1">Periode Peminjaman</p>
+                                <p class="fw-semibold mb-0">
+                                    {{ $pinjamDate?->format('d M Y') ?? '-' }} - {{ $dueDate?->format('d M Y') ?? '-' }}
+                                </p>
+                                @if ($isOverdueNow)
+                                    <span class="badge text-bg-danger mt-1">Lewat jatuh tempo</span>
+                                @endif
+                            </div>
+                            <div class="col-12">
+                                <p class="text-muted mb-1">Tujuan</p>
+                                <p class="fw-semibold mb-0">{{ $currentPeminjaman->tujuan ?? '-' }}</p>
+                            </div>
+                        </div>
+                    @else
+                        <p class="text-muted mb-0">Data peminjaman belum tersedia.</p>
+                    @endif
+                </div>
+            </div>
+        </div>
 
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body">
                     <h5 class="fw-semibold mb-3">Informasi Pengembalian</h5>
                     <div class="alert alert-info mb-4" role="alert">
-                        <i class="bi bi-info-circle me-2"></i>Pilih peminjaman melalui tabel di atas untuk memastikan data yang tepat.
+                        <i class="bi bi-info-circle me-2"></i>
+                        Hanya data berstatus disetujui yang dapat diproses pengembaliannya.
                     </div>
                     <div class="row g-4">
                         <div class="col-md-6">
                             <label for="tanggal_pengembalian" class="form-label">Tanggal Pengembalian</label>
                             <input type="date" id="tanggal_pengembalian" name="tanggal_pengembalian" class="form-control"
-                                value="{{ $tanggalPengembalianValue }}" data-allow-past="true" required>
+                                value="{{ $tanggalPengembalianValue }}" required>
                         </div>
                         <div class="col-md-6">
                             <label for="kondisi_alat" class="form-label">Kondisi Alat</label>
                             <select name="kondisi_alat" id="kondisi_alat" class="form-select" required>
                                 <option value="">Pilih kondisi</option>
                                 <option value="baik" {{ old('kondisi_alat', $pengembalian->kondisi_alat) == 'baik' ? 'selected' : '' }}>Baik</option>
-                                <option value="rusak_ringan" {{ old('kondisi_alat', $pengembalian->kondisi_alat) == 'rusak ringan' ? 'selected' : '' }}>Rusak Ringan</option>
-                                <option value="rusak_berat" {{ old('kondisi_alat', $pengembalian->kondisi_alat) == 'rusak berat' ? 'selected' : '' }}>Rusak Berat</option>
+                                <option value="rusak_ringan" {{ old('kondisi_alat', $pengembalian->kondisi_alat) == 'rusak_ringan' ? 'selected' : '' }}>Rusak Ringan</option>
+                                <option value="rusak_berat" {{ old('kondisi_alat', $pengembalian->kondisi_alat) == 'rusak_berat' ? 'selected' : '' }}>Rusak Berat</option>
                                 <option value="hilang" {{ old('kondisi_alat', $pengembalian->kondisi_alat) == 'hilang' ? 'selected' : '' }}>Hilang</option>
                             </select>
                         </div>
@@ -298,8 +194,10 @@
                             <label for="metode_pembayaran" class="form-label">Metode Pembayaran</label>
                             <select name="metode_pembayaran" id="metode_pembayaran" class="form-select">
                                 <option value="">Pilih metode</option>
-                                <option value="Tunai" {{ old('metode_pembayaran', $pengembalian->metode_pembayaran) == 'Tunai' ? 'selected' : '' }}>Tunai</option>
+                                <option value="tunai" {{ old('metode_pembayaran', $pengembalian->metode_pembayaran) == 'tunai' ? 'selected' : '' }}>Tunai</option>
                                 <option value="QRIS" {{ old('metode_pembayaran', $pengembalian->metode_pembayaran) == 'QRIS' ? 'selected' : '' }}>QRIS</option>
+                                <option value="belum_ditentukan" {{ old('metode_pembayaran', $pengembalian->metode_pembayaran) == 'belum_ditentukan' ? 'selected' : '' }}>Belum Ditentukan</option>
+                                <option value="tidak_denda" {{ old('metode_pembayaran', $pengembalian->metode_pembayaran) == 'tidak_denda' ? 'selected' : '' }}>Tidak Ada Denda</option>
                             </select>
                         </div>
 
@@ -365,12 +263,8 @@
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-auto">
-                        <a href="{{ route('pengembalian.list') }}" class="btn btn-outline-secondary">
-                            Batal
-                        </a>
-                        <button type="submit" class="btn btn-warning">
-                            Simpan Perubahan
-                        </button>
+                        <a href="{{ route('pengembalian.list') }}" class="btn btn-outline-secondary">Batal</a>
+                        <button type="submit" class="btn btn-warning">Simpan Perubahan</button>
                     </div>
                 </div>
             </div>
@@ -382,16 +276,6 @@
 
 @push('styles')
     <style>
-        .peminjaman-row {
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-        .peminjaman-row.table-active {
-            background-color: #f0f7f4;
-        }
-        .selected-summary {
-            background: #f9fafb;
-        }
         .selected-preview {
             width: 100%;
             height: 180px;
@@ -413,23 +297,13 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const peminjamanSelect = document.getElementById('peminjaman_id');
-            const peminjamanRows = document.querySelectorAll('[data-peminjaman-row]');
-            const summaryFields = {
-                peminjam: document.querySelector('[data-summary="peminjam"]'),
-                alat: document.querySelector('[data-summary="alat"]'),
-                pinjam: document.querySelector('[data-summary="pinjam"]'),
-                kembali: document.querySelector('[data-summary="kembali"]'),
-            };
-            const summaryStatus = document.querySelector('[data-summary-status]');
-            const selectedAlert = document.querySelector('[data-selected-alert]');
+            const peminjamanInput = document.getElementById('peminjaman_id');
             const tanggalPengembalianInput = document.getElementById('tanggal_pengembalian');
             const dendaKondisiInput = document.getElementById('denda_kondisi');
             const estimasiTotalDendaSpan = document.getElementById('estimasi_total_denda');
             const infoDendaTelatSpan = document.getElementById('info_denda_telat');
             const metodeBayarSelect = document.getElementById('metode_pembayaran');
             const qrisContainer = document.getElementById('qrisContainer');
-            const searchInput = document.getElementById('searchPeminjaman');
             const fileSelect = document.getElementById('file_bukti_pengembalian_id');
             const fileNameTarget = document.querySelector('[data-file-name]');
             const filePreviewTarget = document.querySelector('[data-file-preview]');
@@ -594,59 +468,8 @@
                 }
             }
 
-            function formatDisplayDate(value) {
-                if (!value) return '-';
-                const date = new Date(value);
-                if (isNaN(date.getTime())) return '-';
-                return date.toLocaleDateString('id-ID', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric'
-                });
-            }
-
-            function highlightSelectedRow() {
-                const selectedId = peminjamanSelect?.value ?? '';
-                peminjamanRows.forEach(row => {
-                    if (row.dataset.peminjamanRow === selectedId) row.classList.add('table-active');
-                    else row.classList.remove('table-active');
-                });
-            }
-
-            function updateSummary() {
-                const option = peminjamanSelect?.selectedOptions?.[0];
-                if (!option || !option.value) {
-                    Object.values(summaryFields).forEach(node => node && (node.textContent = '-'));
-                    if (summaryStatus) {
-                        summaryStatus.textContent = 'Belum dipilih';
-                        summaryStatus.className = 'badge text-bg-secondary';
-                    }
-                    if (selectedAlert) {
-                        selectedAlert.classList.remove('text-danger');
-                        selectedAlert.textContent = 'Klik baris peminjaman untuk memilihnya.';
-                    }
-                    return;
-                }
-                summaryFields.peminjam && (summaryFields.peminjam.textContent = option.dataset.peminjam ?? '-');
-                summaryFields.alat && (summaryFields.alat.textContent = option.dataset.alat ?? '-');
-                summaryFields.pinjam && (summaryFields.pinjam.textContent = formatDisplayDate(option.dataset.pinjamDate));
-                const overdueNow = option.dataset.overdue === 'true';
-                let kembaliText = formatDisplayDate(option.dataset.dueDate);
-                if (overdueNow && kembaliText !== '-') kembaliText += ' (Telat)';
-                summaryFields.kembali && (summaryFields.kembali.textContent = kembaliText);
-                if (summaryStatus) {
-                    summaryStatus.textContent = option.dataset.statusLabel ?? 'Peminjaman';
-                    summaryStatus.className = 'badge ' + (option.dataset.statusClass ?? 'text-bg-secondary');
-                }
-                if (selectedAlert) {
-                    selectedAlert.classList.remove('text-danger');
-                    selectedAlert.textContent = 'Peminjaman sudah dipilih. Lengkapi data pengembalian.';
-                }
-            }
-
             function hitungDendaTelat() {
-                const option = peminjamanSelect?.selectedOptions?.[0];
-                const dueDateStr = option?.dataset?.dueDate ?? '';
+                const dueDateStr = peminjamanInput?.dataset?.dueDate ?? '';
                 const actualDateStr = tanggalPengembalianInput?.value ?? '';
                 if (!dueDateStr || !actualDateStr) return 0;
                 const dueDate = new Date(dueDateStr);
@@ -689,12 +512,6 @@
                     filePreviewTarget.appendChild(img);
                 }
                 if (fileNameTarget) fileNameTarget.textContent = option.dataset.name ?? 'File terpilih';
-            }
-
-            function selectPeminjaman(id) {
-                if (!peminjamanSelect) return;
-                peminjamanSelect.value = id;
-                peminjamanSelect.dispatchEvent(new Event('change'));
             }
 
             function selectFileOption(id) {
@@ -799,44 +616,9 @@
                 });
             }
 
-            if (peminjamanSelect) {
-                peminjamanSelect.addEventListener('change', () => {
-                    highlightSelectedRow();
-                    updateSummary();
-                    updateEstimasiTotalDenda();
-                });
-            }
-            peminjamanRows.forEach(row => {
-                row.addEventListener('click', (event) => {
-                    if (event.target.closest('button')) return;
-                    selectPeminjaman(row.dataset.peminjamanRow);
-                });
-            });
-            document.querySelectorAll('[data-peminjaman-trigger]').forEach(button => {
-                button.addEventListener('click', (event) => {
-                    event.stopPropagation();
-                    selectPeminjaman(button.dataset.peminjamanTrigger);
-                });
-            });
-            if (searchInput) {
-                searchInput.addEventListener('input', (event) => {
-                    const keyword = event.target.value.toLowerCase();
-                    peminjamanRows.forEach(row => {
-                        const text = row.textContent?.toLowerCase() ?? '';
-                        row.style.display = text.includes(keyword) ? '' : 'none';
-                    });
-                });
-            }
             if (tanggalPengembalianInput) {
-                const allowPast = tanggalPengembalianInput.dataset.allowPast === 'true';
-                if (!allowPast) {
-                    tanggalPengembalianInput.min = todayValue;
-                    if (tanggalPengembalianInput.value && tanggalPengembalianInput.value < todayValue) tanggalPengembalianInput.value = todayValue;
-                }
-                tanggalPengembalianInput.addEventListener('change', () => {
-                    if (!allowPast && tanggalPengembalianInput.value && tanggalPengembalianInput.value < todayValue) tanggalPengembalianInput.value = todayValue;
-                    updateEstimasiTotalDenda();
-                });
+                tanggalPengembalianInput.min = todayValue;
+                tanggalPengembalianInput.addEventListener('change', updateEstimasiTotalDenda);
             }
             if (dendaKondisiInput) {
                 dendaKondisiInput.addEventListener('input', updateEstimasiTotalDenda);
@@ -848,8 +630,6 @@
                 });
             });
             document.querySelectorAll('[data-file-row]').forEach(row => attachFileActions(row));
-            highlightSelectedRow();
-            updateSummary();
             updateEstimasiTotalDenda();
             updateFilePreview();
         });

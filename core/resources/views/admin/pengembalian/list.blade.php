@@ -3,14 +3,13 @@
 @section('title', 'Daftar Pengembalian - EcoLend')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+<div class="d-flex justify-content-between align-items-center mb-4 mt-5">
     <h2 class="fw-bold mb-0">Daftar Pengembalian</h2>
 </div>
 
 <div class="card border-0 shadow-sm rounded-4">
     <div class="card-body">
 
-        {{-- Alert --}}
         @foreach (['error', 'info'] as $msg)
         @if (session($msg))
         <div class="alert alert-{{ $msg === 'error' ? 'danger' : $msg }} alert-dismissible fade show">
@@ -20,13 +19,12 @@
         @endif
         @endforeach
 
-        {{-- Controls --}}
         <form method="GET" class="row g-2 mb-3 align-items-center mt-2">
-            {{-- <div class="col-md-3">
-                <a href="{{ route('pengembalian.create') }}" class="btn btn-outline-warning w-100">
-                    Tambah Pengembalian
+            <div class="col-md-3">
+                <a href="{{ route('peminjaman.list') }}" class="btn btn-outline-warning w-100">
+                    Pilih dari Peminjaman
                 </a>
-            </div> --}}
+            </div>
 
             <div class="col-md-2">
                 <select name="per_page" class="form-select" onchange="this.form.submit()">
@@ -49,7 +47,6 @@
             </div>
         </form>
 
-        {{-- Table --}}
         <div class="table-responsive">
             <table class="table table-striped align-middle">
                 <thead class="table-light">
@@ -91,8 +88,8 @@
 
                             $badgeColor = match ($kondisi) {
                             'baik' => 'success',
-                            'rusak ringan' => 'warning',
-                            'rusak berat' => 'danger',
+                            'rusak_ringan' => 'warning',
+                            'rusak_berat' => 'danger',
                             'hilang' => 'dark',
                             default => 'secondary',
                             };
@@ -122,34 +119,33 @@
 
                         <td class="text-center">
                             <div class="d-inline-flex gap-2">
-                                <a href="{{ route('pengembalian.show', $item->id) }}"
-                                    class="btn btn-sm btn-outline-info">
-                                    Detail
-                                </a>
-
-                                {{-- <a href="{{ route('pengembalian.edit', $item->id) }}"
+                                <a href="{{ route('pengembalian.edit', $item->id) }}"
                                     class="btn btn-sm btn-outline-primary">
                                     Edit
-                                </a> --}}
-
-                                <form
-                                    action="{{ route('pengembalian.destroy', $item->id) }}"
-                                    method="POST"
-                                    class="form-hapus"
-                                    data-title="Yakin ingin menghapus?"
-                                    data-text="Data pengembalian ini akan dihapus secara permanen.">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                                        Hapus
+                                </a>
+                                <a href="{{ route('pengembalian.show', $item->id) }}"
+                                    class="btn btn-sm btn-outline-secondary">
+                                    Lihat
+                                </a>
+                                @if (Route::has('petugas.pengembalian.send-whatsapp'))
+                                    @if (!empty($item->peminjaman->peminjam->no_telp))
+                                    <a href="{{ route('petugas.pengembalian.send-whatsapp', $item->id) }}"
+                                        class="btn btn-sm btn-outline-success" target="_blank" rel="noopener">
+                                        WhatsApp
+                                    </a>
+                                    @else
+                                    <button type="button" class="btn btn-sm btn-outline-success" disabled
+                                        title="Nomor WhatsApp peminjam belum tersedia">
+                                        WhatsApp
                                     </button>
-                                </form>
+                                    @endif
+                                @endif
                             </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center text-muted py-4">
+                        <td colspan="8" class="text-center text-muted py-4">
                             Data pengembalian tidak ditemukan
                         </td>
                     </tr>
@@ -158,7 +154,6 @@
             </table>
         </div>
 
-        {{-- Footer --}}
         <div class="d-flex justify-content-between align-items-center">
             <small class="text-muted">
                 Menampilkan {{ $pengembalians->firstItem() }} –

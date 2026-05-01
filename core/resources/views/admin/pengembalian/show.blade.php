@@ -65,6 +65,19 @@
             <a href="{{ route('pengembalian.list') }}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left me-1"></i> Kembali
             </a>
+            @if (Route::has('petugas.pengembalian.send-whatsapp'))
+                @if (!empty($borrower?->no_telp))
+                    <a href="{{ route('petugas.pengembalian.send-whatsapp', $pengembalian->id) }}"
+                        class="btn btn-outline-success" target="_blank" rel="noopener">
+                        <i class="bi bi-whatsapp me-1"></i> Kirim WhatsApp
+                    </a>
+                @else
+                    <button type="button" class="btn btn-outline-success" disabled
+                        title="Nomor WhatsApp peminjam belum tersedia">
+                        <i class="bi bi-whatsapp me-1"></i> Kirim WhatsApp
+                    </button>
+                @endif
+            @endif
             <a href="{{ route('pengembalian.edit', $pengembalian->id) }}" class="btn btn-primary">
                 <i class="bi bi-pencil me-1"></i> Edit
             </a>
@@ -84,7 +97,7 @@
                         <div class="col-md-6">
                             <p class="text-muted mb-1">Tanggal Pengembalian</p>
                             <p class="fw-semibold mb-0">
-                                {{ $pengembalian->tanggal_pengembalian ? \Illuminate\Support\Carbon::parse($pengembalian->tanggal_pengembalian)->translatedFormat('d M Y H:i') : '-' }}
+                                {{ $pengembalian->tanggal_pengembalian ? \Illuminate\Support\Carbon::parse($pengembalian->tanggal_pengembalian)->translatedFormat('d M Y') : '-' }}
                             </p>
                         </div>
                         <div class="col-md-6">
@@ -255,16 +268,22 @@
                             <th width="35%" class="text-muted">Username</th>
                             <td>{{ $borrower->username ?? '-' }}</td>
                         </tr>
-                        @if (!empty($borrower->phone))
+                        @if (!empty($borrower->no_telp))
                             <tr>
                                 <th class="text-muted">No. Telepon</th>
-                                <td>{{ $borrower->phone }}</td>
+                                <td>{{ $borrower->no_telp }}</td>
                             </tr>
                         @endif
-                        @if (!empty($borrower->address))
+                        @if (!empty($borrower->npm))
                             <tr>
-                                <th class="text-muted">Alamat</th>
-                                <td>{{ $borrower->address }}</td>
+                                <th class="text-muted">NPM</th>
+                                <td>{{ $borrower->npm }}</td>
+                            </tr>
+                        @endif
+                        @if (!empty($borrower->program_studi))
+                            <tr>
+                                <th class="text-muted">Program Studi</th>
+                                <td>{{ $borrower->program_studi }}</td>
                             </tr>
                         @endif
                     </table>

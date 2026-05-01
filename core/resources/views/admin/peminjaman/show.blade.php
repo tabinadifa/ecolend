@@ -91,9 +91,6 @@
                         Email: {{ optional($peminjaman->peminjam)->email ?? '-' }}
                     </p>
                     <p class="mb-0 text-muted">
-                        Role: {{ optional($peminjaman->peminjam)->role ?? '-' }}
-                    </p>
-                    <p class="mb-0 text-muted">
                         NPM: {{ optional($peminjaman->peminjam)->npm ?? '-' }}
                     </p>
                     <p class="mb-0 text-muted">
@@ -145,11 +142,19 @@
                     </tr>
                     <tr>
                         <th class="text-muted">Kondisi Alat</th>
-                        <td>{{ $peminjaman->pengembalian->kondisi_alat ?? '-' }}</td>
+                        <td>
+                            {{ $peminjaman->pengembalian->kondisi_alat
+                                ? ucwords(str_replace('_', ' ', $peminjaman->pengembalian->kondisi_alat))
+                                : '-' }}
+                        </td>
                     </tr>
                     <tr>
                         <th class="text-muted">Status</th>
-                        <td>{{ $peminjaman->pengembalian->status ?? '-' }}</td>
+                        <td>
+                            {{ $peminjaman->pengembalian->status
+                                ? ucwords(str_replace('_', ' ', $peminjaman->pengembalian->status))
+                                : '-' }}
+                        </td>
                     </tr>
                     <tr>
                         <th class="text-muted">Denda</th>
@@ -159,7 +164,11 @@
                     </tr>
                     <tr>
                         <th class="text-muted">Metode Pembayaran</th>
-                        <td>{{ $peminjaman->pengembalian->metode_pembayaran ?? '-' }}</td>
+                        <td>
+                            {{ $peminjaman->pengembalian->metode_pembayaran
+                                ? ucwords(str_replace('_', ' ', $peminjaman->pengembalian->metode_pembayaran))
+                                : '-' }}
+                        </td>
                     </tr>
                     <tr>
                         <th class="text-muted">Catatan</th>
