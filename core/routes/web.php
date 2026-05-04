@@ -135,6 +135,7 @@ Route::prefix('ecolend')->middleware('auth')->group(function () {
 
         Route::controller(RiwayatController::class)->prefix('riwayat')->group(function () {
             Route::get('peminjaman', 'listPeminjamanUser')->name('peminjam.riwayat.list');
+            Route::get('peminjaman/{peminjaman}', 'show')->name('peminjam.riwayat.show');
             Route::delete('peminjaman/{peminjaman}', 'destroy')->name('peminjam.riwayat.destroy');
         });
 

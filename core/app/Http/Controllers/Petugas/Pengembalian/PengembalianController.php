@@ -46,13 +46,28 @@ class PengembalianController extends Controller
         // Search
         if ($request->filled('search')) {
             $keyword = $request->search;
-            $query->whereHas('peminjaman.peminjam', function ($sub) use ($keyword) {
-                $sub->where('name', 'like', "%{$keyword}%")
-                    ->orWhere('username', 'like', "%{$keyword}%")
-                    ->orWhere('email', 'like', "%{$keyword}%");
-            })->orWhereHas('peminjaman.alat', function ($sub) use ($keyword) {
-                $sub->where('nama_alat', 'like', "%{$keyword}%");
+            $query->where(function ($subQuery) use ($keyword) {
+                $subQuery->whereHas('peminjaman.peminjam', function ($sub) use ($keyword) {
+                    $sub->where('name', 'like', "%{$keyword}%")
+                        ->orWhere('username', 'like', "%{$keyword}%")
+                        ->orWhere('email', 'like', "%{$keyword}%");
+                })->orWhereHas('peminjaman.alat', function ($sub) use ($keyword) {
+                    $sub->where('nama_alat', 'like', "%{$keyword}%");
+                });
             });
+        }
+
+        // Status filter
+        $status = $request->get('status');
+        $allowedStatuses = ['lunas', 'belum_lunas'];
+        if (in_array($status, $allowedStatuses, true)) {
+            $query->where('status', $status);
+        }
+
+        // Sorting
+        $sortDir = strtolower((string) $request->get('sort', 'desc'));
+        if (!in_array($sortDir, ['asc', 'desc'], true)) {
+            $sortDir = 'desc';
         }
 
         // Pagination
@@ -63,7 +78,7 @@ class PengembalianController extends Controller
         }
 
         $pengembalians = $query
-            ->latest()
+            ->orderBy('created_at', $sortDir)
             ->paginate($perPage)
             ->withQueryString();
 

@@ -133,17 +133,10 @@
                                     @endif
                                 </td>
                                 <td class="text-start">
-                                    <form action="{{ route('peminjam.riwayat.destroy', $item) }}" method="POST"
-                                        class="d-inline-block form-hapus"
-                                        data-title="Hapus riwayat ini?"
-                                        data-text="Riwayat peminjaman akan dihapus secara permanen.">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-outline-danger btn-sm">
-                                            <i class="bi bi-trash"></i>
-                                            <span class="ms-1">Hapus</span>
-                                        </button>
-                                    </form>
+                                    <a href="{{ route('peminjam.riwayat.show', $item) }}" class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi bi-eye"></i>
+                                        <span class="ms-1">Detail</span>
+                                    </a>
                                 </td>
                             </tr>
                         @empty

@@ -36,7 +36,21 @@
                 </select>
             </div>
 
-            <div class="col-md-4 ms-auto">
+            <div class="col-md-2">
+                <select name="status" class="form-select" onchange="this.form.submit()">
+                    <option value="">Semua Status</option>
+                    <option value="lunas" {{ request('status') === 'lunas' ? 'selected' : '' }}>Lunas</option>
+                    <option value="belum_lunas" {{ request('status') === 'belum_lunas' ? 'selected' : '' }}>Belum Lunas</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <select name="sort" class="form-select" onchange="this.form.submit()">
+                    <option value="desc" {{ request('sort', 'desc') === 'desc' ? 'selected' : '' }}>Terbaru</option>
+                    <option value="asc" {{ request('sort') === 'asc' ? 'selected' : '' }}>Terlama</option>
+                </select>
+            </div>
+            <div class="col-md-3">
                 <input
                     type="text"
                     name="search"
@@ -127,7 +141,7 @@
                                     class="btn btn-sm btn-outline-secondary">
                                     Lihat
                                 </a>
-                                @if (!empty($item->peminjaman->peminjam->phone))
+                                @if (!empty($item->peminjaman->peminjam->no_telp))
                                 <a href="{{ route('petugas.pengembalian.send-whatsapp', $item->id) }}"
                                     class="btn btn-sm btn-outline-success" target="_blank" rel="noopener">
                                     WhatsApp

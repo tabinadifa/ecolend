@@ -98,4 +98,43 @@ class RiwayatController extends Controller
             ->route('peminjam.riwayat.list')
             ->with('success', 'Data peminjaman berhasil dihapus.');
     }
+
+    public function show(Peminjaman $peminjaman)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('auth.login')
+                ->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        if ($peminjaman->peminjam_id !== Auth::id()) {
+            abort(403, 'Unauthorized');
+        }
+
+        $peminjaman->load(
+            'alat:id,nama_alat,kategori_id',
+            'alat.kategori:id,nama_kategori',
+            'pengembalian:id,peminjaman_id,tanggal_pengembalian,kondisi_alat,denda,status,catatan,metode_pembayaran,file_bukti_pengembalian_id',
+            'pengembalian.fileBuktiPengembalian'
+        );
+
+        $statusLabels = [
+            'pending' => 'Menunggu Persetujuan',
+            'approve' => 'Disetujui',
+            'rejected' => 'Ditolak',
+            'returned' => 'Dikembalikan',
+        ];
+
+        $statusBadges = [
+            'pending' => 'bg-warning text-dark',
+            'approve' => 'bg-success',
+            'rejected' => 'bg-danger',
+            'returned' => 'bg-secondary',
+        ];
+
+        return view('peminjam.riwayat.show', [
+            'peminjaman' => $peminjaman,
+            'statusLabels' => $statusLabels,
+            'statusBadges' => $statusBadges,
+        ]);
+    }
 }
