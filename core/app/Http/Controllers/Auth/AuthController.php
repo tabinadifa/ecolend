@@ -8,8 +8,11 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Validation\Rules\Password as RulesPassword;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use App\Mail\OtpVerificationMail;
 
 class AuthController extends Controller
@@ -26,6 +29,11 @@ class AuthController extends Controller
     {
         return view('auth.register');
     }
+
+        public function forgotPasswordForm()
+        {
+            return view('auth.forgot-password');
+        }
 
     /* =======================
      * LOGIN
@@ -88,6 +96,63 @@ class AuthController extends Controller
         return redirect()->route('dashboard')->with('success', 'Login berhasil');
     }
 
+        public function sendResetLink(Request $request)
+        {
+            $request->validate([
+                'email' => ['required', 'email'],
+            ]);
+
+            $status = Password::sendResetLink(
+                $request->only('email')
+            );
+
+            if ($status === Password::RESET_LINK_SENT) {
+                return back()->with('success', 'Link reset password telah dikirim ke email Anda.');
+            }
+
+            return back()->withErrors([
+                'email' => 'Email tidak ditemukan atau gagal mengirim tautan reset.',
+            ]);
+        }
+
+        public function resetPasswordForm(string $token)
+        {
+            return view('auth.reset-password', [
+                'token' => $token,
+                'email' => request('email'),
+            ]);
+        }
+
+        public function resetPasswordProcess(Request $request)
+        {
+            $request->validate([
+                'token' => ['required'],
+                'email' => ['required', 'email'],
+                'password' => ['required', 'confirmed', RulesPassword::defaults()],
+            ]);
+
+            $status = Password::reset(
+                $request->only('email', 'password', 'password_confirmation', 'token'),
+                function ($user, $password) {
+                    $user->forceFill([
+                        'password' => Hash::make($password),
+                    ])->setRememberToken(Str::random(60));
+
+                    $user->save();
+
+                    event(new PasswordReset($user));
+                }
+            );
+
+            if ($status === Password::PASSWORD_RESET) {
+                return redirect()->route('auth.login')->with('success', 'Password berhasil direset. Silakan login.');
+            }
+
+            return back()->withErrors([
+                'email' => 'Token reset tidak valid atau sudah kedaluwarsa.',
+            ]);
+        }
+
     /* =======================
      * REGISTER
      * ======================= */
@@ -100,7 +165,7 @@ class AuthController extends Controller
             'npm'      => 'required|string|max:100|unique:users',
             'program_studi' => 'required|string|max:255',
             'no_telp' => 'required|string|max:100',
-            'password' => ['required', 'confirmed', Password::defaults()],
+            'password' => ['required', 'confirmed', RulesPassword::defaults()],
         ], [
             'email.unique' => 'Email sudah terdaftar, silakan gunakan email lain.',
             'username.unique' => 'Username sudah terdaftar, silakan gunakan username lain',

@@ -29,6 +29,10 @@ Route::prefix(env('ROUTE_PREFIX_LOGIN'))->group(function () {
     Route::controller(AuthController::class)->group(function () {
         Route::get('/', 'login')->name('auth.login');
         Route::post('login', 'loginProcess')->name('auth.login.process');
+        Route::get('forgot-password', 'forgotPasswordForm')->name('auth.forgot');
+        Route::post('forgot-password', 'sendResetLink')->name('auth.forgot.process');
+        Route::get('reset-password/{token}', 'resetPasswordForm')->name('auth.reset');
+        Route::post('reset-password', 'resetPasswordProcess')->name('auth.reset.process');
         Route::get('register', 'register')->name('auth.register');
         Route::post('register', 'registerProcess')->name('auth.register.process');
         Route::get('verify-otp', 'verifyOtpForm')->name('auth.verify_otp');
@@ -37,6 +41,9 @@ Route::prefix(env('ROUTE_PREFIX_LOGIN'))->group(function () {
         Route::post('logout', 'logout')->name('auth.logout');
     });
 });
+
+Route::get(env('ROUTE_PREFIX_LOGIN') . '/reset-password/{token}', [AuthController::class, 'resetPasswordForm'])
+    ->name('password.reset');
 
 Route::get('/login', function () {
     return redirect()->route('auth.login');

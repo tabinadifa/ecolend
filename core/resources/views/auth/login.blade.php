@@ -343,6 +343,18 @@
         text-decoration: underline;
     }
 
+    .helper-link {
+        display: inline-block;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #f97316;
+        text-decoration: none;
+    }
+
+    .helper-link:hover {
+        text-decoration: underline;
+    }
+
     @media (max-width: 768px) {
         body { padding: 0; }
         .page-wrap {
@@ -434,6 +446,10 @@
                         <svg class="input-icon" viewBox="0 0 24 24" stroke-width="1.8"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         <input type="password" name="password" placeholder="••••••••" required>
                     </div>
+                </div>
+
+                <div class="d-flex justify-content-end mb-2">
+                    <a href="{{ route('auth.forgot') }}" class="helper-link">Lupa password?</a>
                 </div>
 
                 <button type="submit" class="btn-login">Masuk ke Akun</button>
