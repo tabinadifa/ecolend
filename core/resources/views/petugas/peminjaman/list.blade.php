@@ -55,6 +55,19 @@
         border-color: var(--primary-green);
     }
 
+    .btn-eco {
+        background: var(--primary-green);
+        border-color: var(--primary-green);
+        color: #fff;
+    }
+
+    .btn-eco:hover,
+    .btn-eco:focus {
+        background: #15693F;
+        border-color: #15693F;
+        color: #fff;
+    }
+
     .modal-content {
         border: none;
         border-radius: 1rem;

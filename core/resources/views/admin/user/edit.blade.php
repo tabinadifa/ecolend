@@ -67,7 +67,6 @@
                 <label for="role" class="form-label">Role</label>
                 <select name="role" id="role" class="form-select" required>
                     <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin</option>
-                    <option value="peminjam" {{ old('role', $user->role) == 'peminjam' ? 'selected' : '' }}>Peminjam</option>
                     <option value="petugas" {{ old('role', $user->role) == 'petugas' ? 'selected' : '' }}>Petugas</option>
                 </select>
             </div>

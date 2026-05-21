@@ -81,7 +81,13 @@
 						</tr>
 						<tr>
 							<th class="info-label">Kondisi Alat</th>
-							<td>{{ $pengembalian->kondisi_alat ?? '-' }}</td>
+							<td>
+								@if ($pengembalian->kondisi_alat)
+									{{ ucfirst(str_replace('_', ' ', $pengembalian->kondisi_alat)) }}
+								@else
+									-
+								@endif
+							</td>
 						</tr>
 						<tr>
 							<th class="info-label">Denda</th>

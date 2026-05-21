@@ -112,7 +112,13 @@
 									<td>{{ $formatDate($peminjaman?->tanggal_pinjam) }}</td>
 									<td>{{ $formatDate($peminjaman?->tanggal_kembali) }}</td>
 									<td>{{ $formatDate($pengembalian->tanggal_pengembalian) }}</td>
-									<td>{{ $pengembalian->kondisi_alat ?? '-' }}</td>
+									<td>
+										@if ($pengembalian->kondisi_alat)
+											{{ ucfirst(str_replace('_', ' ', $pengembalian->kondisi_alat)) }}
+										@else
+											-
+										@endif
+									</td>
 									<td>Rp {{ number_format((float) $pengembalian->denda, 0, ',', '.') }}</td>
 									<td>
 										<a href="{{ route('peminjam.pengembalian.show', $pengembalian) }}" class="btn btn-outline-warning btn-sm">

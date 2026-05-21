@@ -49,7 +49,7 @@ class PeminjamanController extends Controller
         }
 
         $alat = Alat::with(['gambarAlat', 'kategori'])
-            ->select('id', 'nama_alat', 'jumlah_stok', 'gambar_alat_id', 'kategori_id')
+            ->select('id', 'nama_alat', 'jumlah_stok', 'gambar_alat_id', 'kategori_id', 'deskripsi')
             ->where('id', $alat->id)
             ->first();
 
