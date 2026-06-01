@@ -25,6 +25,7 @@ class PengembalianController extends Controller
             'tanggal_pengembalian',
             'kondisi_alat',
             'denda',
+            'status',
             'created_at'
         );
 

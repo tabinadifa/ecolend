@@ -88,10 +88,8 @@
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
             <div>
                 <h2 class="fw-bold mb-1">Profil Pengguna</h2>
-                <p class="text-muted mb-0">Kelola informasi akun, foto profil, dan identitas personal Anda.</p>
             </div>
             <div class="d-flex gap-2">
-                <span class="badge rounded-pill text-bg-light border px-3 py-2">Role: {{ $user->role ?? '-' }}</span>
                 <span class="badge rounded-pill text-bg-warning px-3 py-2">Aktif sejak {{ $activeSince ?? '-' }}</span>
             </div>
         </div>
@@ -111,7 +109,9 @@
                         @endif
                     </div>
                     <h4 class="fw-bold mb-0">{{ $user->name ?? '-' }}</h4>
-                    <p class="text-muted text-capitalize mb-4">{{ $user->role ?? '-' }}</p>
+                    <p class="text-muted text-capitalize mb-4">
+                        {{ ($user->role ?? null) === 'peminjam' ? 'Mahasiswa' : ($user->role ?? '-') }}
+                    </p>
 
                     @if ($errors->any())
                         <div class="alert alert-danger text-start py-2 px-3">
@@ -165,9 +165,11 @@
                                 @enderror
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label text-muted">Peran</label>
+                                <label class="form-label text-muted">Status</label>
                                 <div class="border rounded-3 px-3 py-2 bg-light d-flex align-items-center justify-content-between">
-                                    <span class="fw-semibold text-dark text-capitalize">{{ $user->role ?? '-' }}</span>
+                                    <span class="fw-semibold text-dark text-capitalize">
+                                        {{ ($user->role ?? null) === 'peminjam' ? 'Mahasiswa' : ($user->role ?? '-') }}
+                                    </span>
                                     <i class="bi bi-shield-check text-warning"></i>
                                 </div>
                             </div>
@@ -196,7 +198,9 @@
                                     name="npm"
                                     class="form-control @error('npm') is-invalid @enderror"
                                     value="{{ old('npm', $user->npm) }}"
+                                    readonly
                                 >
+                                <small class="text-muted">NPM tidak dapat diubah.</small>
                                 @error('npm')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -208,7 +212,9 @@
                                     name="program_studi"
                                     class="form-control @error('program_studi') is-invalid @enderror"
                                     value="{{ old('program_studi', $user->program_studi) }}"
+                                    readonly
                                 >
+                                <small class="text-muted">Program studi tidak dapat diubah.</small>
                                 @error('program_studi')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

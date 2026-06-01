@@ -48,6 +48,16 @@
 			'returned' => 'bg-secondary',
 		];
 
+		$statusDendaLabels = [
+			'lunas' => 'Lunas',
+			'belum_lunas' => 'Belum Lunas',
+		];
+
+		$statusDendaBadges = [
+			'lunas' => 'bg-success',
+			'belum_lunas' => 'bg-warning text-dark',
+		];
+
 		$peminjaman = $pengembalian->peminjaman;
 		$alat = $peminjaman?->alat;
 		$file = $pengembalian->fileBuktiPengembalian;
@@ -56,6 +66,8 @@
 		$dendaValue = (float) ($pengembalian->denda ?? 0);
 		$status = $peminjaman?->status;
 		$badgeClass = $statusBadges[$status] ?? 'bg-secondary';
+		$statusDenda = $pengembalian->status;
+		$statusDendaBadge = $statusDendaBadges[$statusDenda] ?? 'bg-secondary';
 	@endphp
 
 	<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
@@ -97,6 +109,14 @@
 								@else
 									<span class="badge bg-success">Tidak ada denda</span>
 								@endif
+							</td>
+						</tr>
+						<tr>
+							<th class="info-label">Status</th>
+							<td>
+								<span class="badge {{ $statusDendaBadge }}">
+									{{ $statusDendaLabels[$statusDenda] ?? 'Status tidak tersedia' }}
+								</span>
 							</td>
 						</tr>
 						<tr>
@@ -144,7 +164,7 @@
 							<th class="info-label">Status</th>
 							<td>
 								<span class="badge {{ $badgeClass }}">
-									{{ $statusLabels[$status] ?? ($status ? ucfirst($status) : 'Status tidak tersedia') }}
+									{{ $statusLabels[$status] ?? ($status ? ucfirst(str_replace('_', ' ', $status)) : 'Status tidak tersedia') }}
 								</span>
 							</td>
 						</tr>

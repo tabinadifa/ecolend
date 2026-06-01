@@ -97,6 +97,7 @@
 								<th>Tgl Pengembalian</th>
 								<th>Kondisi</th>
 								<th>Denda</th>
+								<th>Status</th>
 								<th>Aksi</th>
 							</tr>
 						</thead>
@@ -120,6 +121,11 @@
 										@endif
 									</td>
 									<td>Rp {{ number_format((float) $pengembalian->denda, 0, ',', '.') }}</td>
+									<td>
+										<span class="badge badge-status {{ $pengembalian->status === 'belum_lunas' ? 'text-bg-danger' : ($pengembalian->status === 'lunas' ? 'text-bg-success' : 'text-bg-secondary') }}">
+											{{ ucfirst(str_replace('_', ' ', $pengembalian->status)) }}
+										</span>
+									</td>
 									<td>
 										<a href="{{ route('peminjam.pengembalian.show', $pengembalian) }}" class="btn btn-outline-warning btn-sm">
 											Lihat Detail

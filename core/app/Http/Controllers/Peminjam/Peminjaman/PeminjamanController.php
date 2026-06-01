@@ -26,6 +26,10 @@ class PeminjamanController extends Controller
             $query->where('nama_alat', 'like', "%{$search}%");
         }
 
+        if ($request->filled('kategori')) {
+            $query->where('kategori_id', (int) $request->kategori);
+        }
+
         $perPage = (int) $request->get('per_page', 10);
         $allowedSizes = [5, 10, 25, 50];
         if (!in_array($perPage, $allowedSizes, true)) {

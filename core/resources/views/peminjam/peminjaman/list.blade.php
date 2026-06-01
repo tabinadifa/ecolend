@@ -291,6 +291,17 @@
                     @endforeach
                 </select>
             </div>
+            <div class="col-md-4">
+                <label for="kategori" class="form-label filter-title">Kategori</label>
+                <select id="kategori" name="kategori" class="form-select" onchange="this.form.submit()">
+                    <option value="">Semua Kategori</option>
+                    @foreach ($kategoriAlats as $kategori)
+                        <option value="{{ $kategori->id }}" @selected((int) request('kategori') === $kategori->id)>
+                            {{ $kategori->nama_kategori }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
             <div class="col-md-6">
                 <label for="search" class="form-label filter-title">Cari Alat</label>
                 <input type="text" id="search" name="search" class="form-control"
