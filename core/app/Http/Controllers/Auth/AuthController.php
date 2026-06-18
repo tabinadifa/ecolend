@@ -17,6 +17,16 @@ use App\Mail\OtpVerificationMail;
 
 class AuthController extends Controller
 {
+    private function sendOtpMail(User $user, string $otpCode): void
+    {
+        try {
+            Mail::to($user->email)->send(new OtpVerificationMail($otpCode, $user->name));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('OTP Mail Error: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
     /* =======================
      * FORM
      * ======================= */
@@ -75,23 +85,48 @@ class AuthController extends Controller
 
         $user = Auth::user();
 
+        if (! $user instanceof User) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('auth.login')->withErrors([
+                'login' => 'Sesi login tidak valid, silakan masuk kembali.',
+            ]);
+        }
+
         // Check verification
         if (is_null($user->email_verified_at)) {
+            $otpCode = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            $user->otp_code = $otpCode;
+            $user->otp_expires_at = Carbon::now()->addMinutes(10);
+            $user->save();
+
+                try {
+                    $this->sendOtpMail($user, $otpCode);
+                } catch (\Throwable $e) {
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+
+                    session(['verify_email' => $user->email]);
+
+                    return redirect()->route('auth.verify_otp')->withErrors([
+                        'login' => 'OTP gagal dikirim ke email. Periksa konfigurasi SMTP lalu coba Kirim Ulang OTP.',
+                    ]);
+                }
+
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
             // Set session for OTP and redirect
             session(['verify_email' => $user->email]);
-            return redirect()->route('auth.verify_otp')->withErrors([
-                'login' => 'Email Anda belum diverifikasi. Silakan masukkan kode OTP yang dikirim ke email Anda.',
-            ]);
+            return redirect()->route('auth.verify_otp')->with('success', 'Email Anda belum diverifikasi. Kode OTP baru telah dikirim ke email Anda.');
         }
 
-        if ($user instanceof User) {
-            $user->last_active_at = Carbon::now();
-            $user->save();
-        }
+        $user->last_active_at = Carbon::now();
+        $user->save();
 
         return redirect()->route('dashboard')->with('success', 'Login berhasil');
     }
@@ -189,11 +224,15 @@ class AuthController extends Controller
             'last_active_at' => Carbon::now(),
         ]);
 
-        try {
-            Mail::to($user->email)->send(new OtpVerificationMail($otpCode, $user->name));
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Mail Error: ' . $e->getMessage());
-        }
+            try {
+                $this->sendOtpMail($user, $otpCode);
+            } catch (\Throwable $e) {
+                session(['verify_email' => $user->email]);
+
+                return redirect()->route('auth.verify_otp')->withErrors([
+                    'login' => 'Registrasi berhasil, tetapi OTP gagal dikirim. Periksa konfigurasi SMTP Gmail lalu coba Kirim Ulang OTP.',
+                ]);
+            }
 
         // Simpan email ke session untuk proses verifikasi
         session(['verify_email' => $user->email]);
@@ -266,10 +305,9 @@ class AuthController extends Controller
             $user->save();
 
             try {
-                Mail::to($user->email)->send(new OtpVerificationMail($otpCode, $user->name));
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Resend Mail Error: ' . $e->getMessage());
-                return back()->withErrors(['otp' => 'Gagal mengirim email, silakan coba lagi. Error: ' . $e->getMessage()]);
+                $this->sendOtpMail($user, $otpCode);
+            } catch (\Throwable $e) {
+                return back()->withErrors(['otp' => 'Gagal mengirim OTP ke email. Periksa SMTP Gmail lalu coba lagi.']);
             }
         }
 
